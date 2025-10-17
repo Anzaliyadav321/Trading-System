@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 // AUTH CONTEXT & PROVIDER
 // ============================================
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://trading-system-1186.onrender.com';
 const AuthContext = React.createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
