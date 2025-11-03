@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 // AUTH CONTEXT & PROVIDER
 // ============================================
 
-const API_BASE_URL = 'https://trading-system-1186.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const AuthContext = React.createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -1638,7 +1638,7 @@ function TradingDashboard() {
     setSignalsError(null);
     const data = await apiService.getTodaySignals(token);
     
-    console.log('✅ Backend Response:', data);
+    console.log('Backend Response:', data);
     
     // Process signals with proper field mapping
     const processedSignals = (data.signals || []).map(signal => ({
