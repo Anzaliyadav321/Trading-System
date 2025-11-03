@@ -35,12 +35,12 @@ def run_merolagani_pipeline():
 
 # Initialize scheduler
 scheduler = BackgroundScheduler()
-scheduler.add_job(run_merolagani_pipeline, "cron", hour=11, minute=0)  # ✅ runs daily at 11:00 AM
+scheduler.add_job(run_merolagani_pipeline, "cron", hour=20, minute=0)  #  runs daily at 8:00 pm
 scheduler.start()
 
 @app.on_event("startup")
 def startup_event():
-    print("[INFO] Scheduler started — merolagani_daily will run every day at 11:00 AM")
+    print("[INFO] Scheduler started — merolagani_daily will run every day at 8:00 PM")
 
 @app.on_event("shutdown")
 def shutdown_event():
