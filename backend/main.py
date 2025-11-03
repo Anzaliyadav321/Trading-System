@@ -55,7 +55,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 # Allow CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://trading-system-anzis-projects-f933b6e6.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -446,18 +446,18 @@ async def get_stop_loss_position(
     ).all()
     
     sold_today = sum(o.quantity for o in today_sells)
-    quantity_sold = position.quantity - position.remaining_qty  # ✅ Calculate sold amount
+    quantity_sold = position.quantity - position.remaining_qty  # Calculate sold amount
     
     return {
         "has_position": True,
         "position": {
             "id": position.id,
             "symbol": position.symbol,
-            "total_quantity": position.quantity,  # ✅ Total originally bought
-            "quantity_sold": quantity_sold,  # ✅ Calculate sold amount
-            "remaining_quantity": position.remaining_qty,  # ✅ What's left to sell
-            "entry_price": position.buy_price,  # ✅ Consistent naming
-            "stop_loss_price": position.stoploss,  # ✅ Consistent naming
+            "total_quantity": position.quantity,  # Total originally bought
+            "quantity_sold": quantity_sold,  # Calculate sold amount
+            "remaining_quantity": position.remaining_qty,  # What's left to sell
+            "entry_price": position.buy_price,  # Consistent naming
+            "stop_loss_price": position.stoploss,  # Consistent naming
             "avg_price": position.avg_price,
             "status": position.status.value,
             "sold_today": sold_today
