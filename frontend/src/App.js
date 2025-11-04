@@ -371,6 +371,7 @@ const OTPVerificationForm = ({ email, onSwitchToLogin, onVerified }) => {
 // REGISTER FORM
 // ============================================
 
+
 const RegisterForm = ({ onSwitchToLogin, onRegistrationSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -380,10 +381,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegistrationSuccess }) => {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
 
-  // Added (e) and preventDefault
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     setError('');
     setSuccess('');
 
@@ -411,8 +409,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegistrationSuccess }) => {
   };
 
   return (
-    // Wrapped the entire form content inside <form>
-    <form onSubmit={handleSubmit} className="w-full max-w-md">
+    <div className="w-full max-w-md">
       <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-200">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -444,7 +441,6 @@ const RegisterForm = ({ onSwitchToLogin, onRegistrationSuccess }) => {
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="your@email.com"
               disabled={loading || success}
-              required
             />
           </div>
 
@@ -457,7 +453,6 @@ const RegisterForm = ({ onSwitchToLogin, onRegistrationSuccess }) => {
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="••••••••"
               disabled={loading || success}
-              required
             />
           </div>
 
@@ -467,21 +462,18 @@ const RegisterForm = ({ onSwitchToLogin, onRegistrationSuccess }) => {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="••••••••"
               disabled={loading || success}
-              required
             />
           </div>
 
-          {/* Changed button to type="submit" */}
           <button
-            type="submit"
+            onClick={handleSubmit}
             disabled={loading || success}
             className={`w-full py-3 rounded-xl text-white font-semibold transition-all shadow-lg ${
-              loading || success
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
+              loading || success ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
             }`}
           >
             {loading ? 'Creating...' : success ? 'Success!' : 'Create Account'}
@@ -491,17 +483,13 @@ const RegisterForm = ({ onSwitchToLogin, onRegistrationSuccess }) => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
-            <button
-              type="button"
-              onClick={onSwitchToLogin}
-              className="text-green-600 hover:text-green-700 font-semibold"
-            >
+            <button onClick={onSwitchToLogin} className="text-green-600 hover:text-green-700 font-semibold">
               Sign in
             </button>
           </p>
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 
