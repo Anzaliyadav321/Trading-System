@@ -55,7 +55,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 # Allow CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://trading-system-anzis-projects-f933b6e6.vercel.app"],
+    allow_origins=[
+        "https://trading-system-anzis-projects-f933b6e6.vercel.app",
+        "https://trading-system-seven.vercel.app",
+        "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
