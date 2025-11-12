@@ -47,43 +47,57 @@
 # for using brevo api instead of smtp
 # backend/core/auth/email_service.py
 
+import httpx
 import os
-import requests
+from fastapi import HTTPException
 
-# Get environment variables
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-MAIL_FROM = os.getenv("MAIL_FROM", "trade8561@gmail.com")
-MAIL_FROM_NAME = os.getenv("MAIL_FROM_NAME", "Trading System")
+BREVO_SENDER_EMAIL = os.getenv("MAIL_FROM", "trade8561@gmail.com")
+BREVO_SENDER_NAME = os.getenv("MAIL_FROM_NAME", "Trading System")
 
-def send_verification_email(email: str, otp: str):
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+
+
+async def send_verification_email(recipient_email: str, otp: str):
     """
-    Sends an OTP verification email using Brevo API (no SMTP).
+    Send a verification email with OTP using Brevo's API.
+    """
+    if not BREVO_API_KEY:
+        raise HTTPException(status_code=500, detail="Brevo API key not configured")
+
+    subject = "Your OTP Verification Code"
+    html_content = f"""
+    <html>
+        <body>
+            <p>Hello,</p>
+            <p>Your OTP code for verification is: <strong>{otp}</strong></p>
+            <p>This code will expire in 10 minutes.</p>
+            <p>Thank you,<br>{BREVO_SENDER_NAME}</p>
+        </body>
+    </html>
     """
 
-    url = "https://api.brevo.com/v3/smtp/email"
+    data = {
+        "sender": {"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
+        "to": [{"email": recipient_email}],
+        "subject": subject,
+        "htmlContent": html_content
+    }
 
     headers = {
         "accept": "application/json",
         "api-key": BREVO_API_KEY,
-        "content-type": "application/json",
+        "content-type": "application/json"
     }
 
-    payload = {
-        "sender": {"name": MAIL_FROM_NAME, "email": MAIL_FROM},
-        "to": [{"email": email}],
-        "subject": "Your Trading System Verification OTP",
-        "htmlContent": f"""
-            <p>Welcome to <b>Trading System</b>!</p>
-            <p>Your One-Time Password (OTP) is: <b>{otp}</b></p>
-            <p>This OTP will expire in 10 minutes. Please do not share it.</p>
-            <p>Thank you,<br>Trading System Team</p>
-        """
-    }
-
-    response = requests.post(url, headers=headers, json=payload)
+    async with httpx.AsyncClient() as client:
+        response = await client.post(BREVO_API_URL, headers=headers, json=data)
 
     if response.status_code != 201:
-        raise Exception(f"Email sending failed: {response.text}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to send email: {response.text}"
+        )
 
-    return response.json()
+    return {"message": "Verification email sent successfully"}
 

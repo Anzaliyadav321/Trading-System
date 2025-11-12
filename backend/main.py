@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from backend.core.database import Base, engine, SessionLocal
 from backend.core.auth.models import User, Order, OrderType, StopLossPosition, StopLossStatus
 from backend.core.auth.schemas import StopLossCreate
-from backend.core.auth import email_service
+# from backend.core.auth import email_service
 from backend.core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
 from backend.core.auth.email_service import send_verification_email
 
