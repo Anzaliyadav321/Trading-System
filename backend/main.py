@@ -17,6 +17,8 @@ from backend.core.auth.models import User, Order, OrderType, StopLossPosition, S
 from backend.core.auth.schemas import StopLossCreate
 from backend.core.auth import email_service
 from backend.core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
+from backend.core.auth.email_service import send_verification_email
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import subprocess
@@ -167,7 +169,9 @@ async def register_user(request: RegisterRequest, db: Session = Depends(get_db))
     db.add(new_user)
     db.commit()
 
-    await email_service.send_verification_email(request.email, otp)
+    # Make sure the function is awaited and async
+    await send_verification_email(request.email, otp)
+
     return {"message": "User registered successfully. Please check your email for OTP."}
 
 @app.post("/auth/verify-otp")
