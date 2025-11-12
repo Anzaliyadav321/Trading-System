@@ -1,6 +1,6 @@
 #backend/core/auth/email_service.py
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from backend.core.config import settings  # ✅ Import your app settings
+from backend.core.config import settings  # Import your app settings
 
 # Configure FastMail using environment variables or settings
 conf = ConnectionConfig(
