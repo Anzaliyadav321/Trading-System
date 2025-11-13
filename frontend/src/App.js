@@ -1643,8 +1643,8 @@ function TradingDashboard() {
     // Process signals with proper field mapping
     const processedSignals = (data.signals || []).map(signal => ({
       symbol: signal.symbol || '',
-      close: signal.price || signal.close || 0,  // Backend sends "price"
-      recommendation: signal.signal || 'REJECT',  // Backend sends "signal"
+      close: signal.price || signal.close || 0,
+      recommendation: signal.signal || 'REJECT',
       quantity: signal.quantity || 100,
       industry: signal.industry || 'N/A',
       industryRank: signal.industryRank || '#N/A',
@@ -1767,23 +1767,33 @@ function TradingDashboard() {
     
     positions.forEach(position => {
       if (consolidated[position.symbol]) {
+        // Symbol already exists - consolidate it
         const existing = consolidated[position.symbol];
-        const totalQty = existing.quantity + position.quantity;
-        const totalAmount = (existing.avBuyPrice * existing.quantity) + (position.buyPrice * position.quantity);
+        const newQty = position.quantity;
+        const totalQty = existing.quantity + newQty;
+        
+        // Calculate weighted average buy price
+        const existingCost = existing.avBuyPrice * existing.quantity;
+        const newCost = position.buyPrice * newQty;
+        const totalCost = existingCost + newCost;
+        const avgBuyPrice = totalCost / totalQty;
         
         consolidated[position.symbol] = {
           ...existing,
           quantity: totalQty,
           totalQuantity: totalQty,
-          avBuyPrice: totalAmount / totalQty,
-          amount: totalAmount,
-          slPrice: Math.min(existing.slPrice, position.slPrice)
+          avBuyPrice: avgBuyPrice,
+          amount: totalCost,
+          slPrice: Math.min(existing.slPrice, position.slPrice),
+          clPrice: position.clPrice
         };
       } else {
+        // First occurrence of this symbol
         consolidated[position.symbol] = {
           ...position,
           avBuyPrice: position.buyPrice,
-          totalQuantity: position.quantity
+          totalQuantity: position.quantity,
+          amount: position.buyPrice * position.quantity
         };
       }
     });
@@ -1791,10 +1801,32 @@ function TradingDashboard() {
     return Object.values(consolidated);
   };
 
+  // ⭐ UPDATED: calculatePortfolioValue with Realized and Unrealized Profit
   const calculatePortfolioValue = () => {
-    const riskValue = risk.reduce((sum, pos) => sum + (pos.amount || 0), 0);
-    const oddLotValue = oddLots.reduce((sum, lot) => sum + (lot.quantity * lot.price), 0);
-    return (cashBalance || 0) + riskValue + oddLotValue + (cumulativeProfitLoss || 0);
+    // 1. Calculate Risk Value (money invested at ORIGINAL buy prices)
+    const riskValue = risk.reduce((sum, pos) => {
+      const investedAmount = pos.amount || (pos.avBuyPrice * pos.quantity);
+      return sum + investedAmount;
+    }, 0);
+    
+    // 2. Calculate Odd Lot Value
+    const oddLotValue = oddLots.reduce((sum, lot) => {
+      return sum + (lot.quantity * lot.price);
+    }, 0);
+    
+    // 3. Calculate realized profit from transactions
+    const realizedProfit = transactions.reduce((sum, tx) => sum + (tx.profit || 0), 0);
+    
+    // 4. Calculate unrealized profit from risk positions
+    const unrealizedProfit = risk.reduce((sum, position) => {
+      const currentValue = position.clPrice * position.quantity;
+      const costBasis = position.avBuyPrice * position.quantity;
+      return sum + (currentValue - costBasis);
+    }, 0);
+    
+    const totalProfitLoss = realizedProfit + unrealizedProfit;
+    
+    return (cashBalance || 0) + riskValue + totalProfitLoss;
   };
 
   const checkRiskPositions = (positions) => {
@@ -1828,12 +1860,9 @@ function TradingDashboard() {
   if (token) {
     fetchRealSignals();
   } else {
-    // Load mock signals if no token
     portfolioSignals = generatePortfolioBasedSignals();
     setSignals(portfolioSignals);
   }
-  
-  setCashBalance(parseInt(riskSettings.portfolioSize));
 
   const mockRiskPositions = [
     {
@@ -1883,6 +1912,15 @@ function TradingDashboard() {
   const consolidatedRisk = consolidateRiskPositions(mockRiskPositions);
   setRisk(consolidatedRisk);
   
+  // Calculate total invested amount
+  const totalInvested = consolidatedRisk.reduce((sum, pos) => {
+    return sum + (pos.amount || (pos.avBuyPrice * pos.quantity));
+  }, 0);
+  
+  // Set cash balance = starting portfolio - invested amount
+  const startingPortfolio = parseInt(riskSettings.portfolioSize);
+  setCashBalance(startingPortfolio - totalInvested);
+  
   const detectedOddLots = checkForOddLots(consolidatedRisk);
   setOddLots(detectedOddLots);
   
@@ -1890,7 +1928,7 @@ function TradingDashboard() {
 
   const initialLogs = [
     {
-      message: `System initialized - ${portfolioSignals.filter(s => s.recommendation === 'BUY').length} buy signals detected`, // ✅ NOW IT WORKS
+      message: `System initialized - ${portfolioSignals.filter(s => s.recommendation === 'BUY').length} buy signals detected`,
       timestamp: new Date().toLocaleTimeString(),
       type: 'system'
     }
@@ -2343,7 +2381,6 @@ function TradingDashboard() {
             </div>
           </div>
 
-          {/* Error Message */}
           {signalsError && (
             <div className="mx-6 mt-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
               <div className="flex items-center">
@@ -2366,7 +2403,6 @@ function TradingDashboard() {
           </div>
 
           <div className="p-6 space-y-6">
-            {/* Row 1: Executor (2/3) + Buy in Transit (1/3) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <Executor
@@ -2411,7 +2447,7 @@ function TradingDashboard() {
                               onClick={() => handleConfirmToRisk(order)}
                               className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow-md flex items-center"
                             >
-                              <span className="mr-2">✓</span> Confirm
+                              <span className="mr-2"></span> Confirm
                             </button>
                           </div>
                         </div>
@@ -2429,7 +2465,6 @@ function TradingDashboard() {
               </div>
             </div>
 
-            {/* Row 2: Risk (2/3) + Sales in Transit (1/3) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <SectionCard
@@ -2551,7 +2586,7 @@ function TradingDashboard() {
                               onClick={() => handleSoldConfirm(sale)}
                               className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow-md flex items-center"
                             >
-                              <span className="mr-2">✓</span> Sold
+                              <span className="mr-2"></span> Sold
                             </button>
                           </div>
                         </div>
@@ -2559,7 +2594,7 @@ function TradingDashboard() {
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full text-gray-500">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                          <span className="text-2xl">💰</span>
+                          <span className="text-2xl"></span>
                         </div>
                         <p className="text-center">No sales in transit</p>
                       </div>
@@ -2569,7 +2604,7 @@ function TradingDashboard() {
               </div>
             </div>
 
-            {/* Row 3: Balance - Full Width */}
+            {/* UPDATED: Balance Section with Swapped Positions */}
             <div className="grid grid-cols-1 gap-6">
               <SectionCard
                 number="5"
@@ -2577,6 +2612,7 @@ function TradingDashboard() {
                 gradient="from-blue-600 to-cyan-600"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* 1. Available Cash - NO CHANGE */}
                   <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-sm">
                     <div className="text-2xl font-bold text-green-700 mb-1">₹{(cashBalance || 0).toLocaleString()}</div>
                     <div className="text-sm font-medium text-green-600">Available Cash</div>
@@ -2588,6 +2624,7 @@ function TradingDashboard() {
                     </div>
                   </div>
 
+                  {/* 2. Risk Amount - NO CHANGE */}
                   <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl shadow-sm">
                     <div className="text-2xl font-bold text-blue-700 mb-1">₹{((parseInt(riskSettings?.portfolioSize || 1000000) - (cashBalance || 0)) || 0).toLocaleString()}</div>
                     <div className="text-sm font-medium text-blue-600">Risk Amount</div>
@@ -2599,29 +2636,98 @@ function TradingDashboard() {
                     </div>
                   </div>
 
-                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-xl shadow-sm">
-                    <div className={`text-2xl font-bold mb-1 ${(cumulativeProfitLoss || 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                      ₹{(cumulativeProfitLoss || 0).toLocaleString()}
-                    </div>
-                    <div className="text-sm font-medium text-purple-600">Cumulative P&L</div>
+                  {/* 3. SWAPPED: Odd Lot Balance (now 3rd position) */}
+                  <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl shadow-sm">
+                    {(() => {
+                      const totalAmount = oddLots.reduce((sum, lot) => {
+                        const netAmount = (lot.quantity * lot.price) - (lot.charges || 0);
+                        return sum + netAmount;
+                      }, 0);
+                      
+                      return (
+                        <>
+                          <div className="text-2xl font-bold text-yellow-800 mb-2">
+                            ₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                          <div className="text-sm font-medium text-yellow-600 mb-3">Odd Lot Balance</div>
+                          
+                          {oddLots && oddLots.length > 0 ? (
+                            <div className="space-y-2 pt-3 border-t border-yellow-300 max-h-32 overflow-y-auto">
+                              {oddLots.map((lot, idx) => (
+                                <div key={idx} className="flex justify-between items-center bg-white/60 rounded-lg p-2 text-xs">
+                                  <span className="font-semibold text-yellow-800">{lot.symbol}</span>
+                                  <span className="text-yellow-700">{lot.quantity} @ ₹{lot.price}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-2 text-yellow-600 text-xs mt-2">
+                              No odd lots available
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
 
+                  {/* 4. Total Portfolio Value - NO CHANGE in position */}
                   <div className="text-center p-4 bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-sm">
                     <div className="text-2xl font-bold text-cyan-700 mb-1">
-                      ₹{calculatePortfolioValue().toLocaleString()}
+                      ₹{calculatePortfolioValue().toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="text-sm font-medium text-cyan-600">Total Portfolio Value</div>
                     <div className="text-xs text-cyan-500 mt-1">
-                      Cash + Risk + Odd Lots + P&L
+                      Cash + Risk + Odd Lots + Realized P&L + Unrealized P&L
                     </div>
                   </div>
                 </div>
 
-                <OddLotBalance oddLots={oddLots} />
+                {/* SWAPPED: Cumulative P&L (now BELOW the grid with subcomponents) */}
+                <div className="mt-4 p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-xl shadow-sm">
+                  {(() => {
+                    // Calculate realized and unrealized profit
+                    const realizedProfit = transactions.reduce((sum, tx) => sum + (tx.profit || 0), 0);
+                    const unrealizedProfit = risk.reduce((sum, position) => {
+                      const currentValue = position.clPrice * position.quantity;
+                      const costBasis = position.avBuyPrice * position.quantity;
+                      return sum + (currentValue - costBasis);
+                    }, 0);
+                    const totalPL = realizedProfit + unrealizedProfit;
+                    
+                    return (
+                      <>
+                        <div className="text-center mb-4">
+                          <div className={`text-3xl font-bold mb-2 ${totalPL >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                            ₹{totalPL.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                          <div className="text-sm font-bold text-purple-600">Cumulative P&L</div>
+                        </div>
+                        
+                        {/* NEW SUBCOMPONENTS */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-4 bg-white/80 rounded-lg border border-purple-200">
+                            <div className="text-xs font-medium text-purple-700 mb-2">Realized Profit</div>
+                            <div className={`text-2xl font-bold ${realizedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {realizedProfit >= 0 ? '+' : ''}₹{realizedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="text-xs text-purple-500 mt-1">From {transactions.length} completed trades</div>
+                          </div>
+                          
+                          <div className="p-4 bg-white/80 rounded-lg border border-purple-200">
+                            <div className="text-xs font-medium text-purple-700 mb-2">Unrealized Profit</div>
+                            <div className={`text-2xl font-bold ${unrealizedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {unrealizedProfit >= 0 ? '+' : ''}₹{unrealizedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="text-xs text-purple-500 mt-1">From {risk.length} open positions</div>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
               </SectionCard>
             </div>
 
-            {/* Row 4: Biller - Full Width */}
             <div className="grid grid-cols-1 gap-6">
               <Biller
                 billerPositions={billerPositions}
