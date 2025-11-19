@@ -1,20 +1,30 @@
 #backend/main.py
-from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Boolean, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session, relationship
-from passlib.context import CryptContext
-from jose import JWTError, jwt
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, date
+from jose import jwt, JWTError
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from dotenv import load_dotenv
+from pathlib import Path  
+import bcrypt, random, os
 import pandas as pd
+
+
+
+# Local imports
+from backend.core.database import Base, engine, SessionLocal
+from backend.core.auth.models import (
+    User, Order, OrderType, StopLossPosition, StopLossStatus,
+    UserPortfolio, Position, DailyEntry, PositionStatus  
+)
+from backend.core.auth.schemas import StopLossCreate
+from backend.core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
+from backend.core.auth.email_service import send_verification_email
+
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-import pytz
-import os
 import subprocess
 
 # File paths for signals
