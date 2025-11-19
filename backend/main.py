@@ -5,14 +5,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime, timedelta, date
 from jose import jwt, JWTError
+from pathlib import Path
 from dotenv import load_dotenv
+import bcrypt
+import random
+import os
+import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from pathlib import Path  
-import bcrypt, random, os
-import pandas as pd
+from apscheduler.schedulers.background import BackgroundScheduler
+import subprocess
 
+# Load environment variables FIRST
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
+# File paths for signals
+BACKEND_DIR = Path(__file__).resolve().parent
+MASTER_PATH = BACKEND_DIR / "core" / "data" / "Master_data.csv"
+ALL_SIGNALS_PATH = BACKEND_DIR / "core" / "data" / "all_signals.csv"
 
 # Local imports
 from backend.core.database import Base, engine, SessionLocal
@@ -24,17 +34,7 @@ from backend.core.auth.schemas import StopLossCreate
 from backend.core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
 from backend.core.auth.email_service import send_verification_email
 
-from apscheduler.schedulers.background import BackgroundScheduler
-import subprocess
 
-# Load environment variables
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
-
-
-# File paths for signals
-BACKEND_DIR = Path(__file__).resolve().parent
-MASTER_PATH = BACKEND_DIR / "core" / "data" / "Master_data.csv"
-ALL_SIGNALS_PATH = BACKEND_DIR / "core" / "data" / "all_signals.csv"
 
 # App initialization
 app = FastAPI(title="Trading System with JWT + OTP + DB Orders", version="1.0.0")
@@ -82,6 +82,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(run_merolagani_pipeline, "cron", hour=14, minute=15)
 scheduler.start()
 
+
 # UPDATED STARTUP EVENT
 @app.on_event("startup")
 def startup_event():
@@ -103,18 +104,25 @@ def startup_event():
         inspector = inspect(engine)
         tables = inspector.get_table_names()
         
-        print(f"\n Tables in database: {len(tables)}")
+        print(f"\nTables in database: {len(tables)}")
         for table in tables:
             print(f"   {table}")
         print("="*80 + "\n")
         
+        # ADD THIS: Log database connection type
+        DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./trading.db")
+        if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
+            print("[INFO] Connected to PostgreSQL (Production)")
+        else:
+            print("[INFO] Using SQLite (Local Development)")
+        
         print("[INFO] Scheduler started — merolagani_daily will run every day at 8:00 PM Nepali time")
         
     except Exception as e:
-        print(f"Error creating tables: {e}")
+        print(f"[ERROR] Failed to initialize database: {e}")
         import traceback
         traceback.print_exc()
-
+        raise  # Re-raise to prevent app from starting with broken DB
 @app.on_event("shutdown")
 def shutdown_event():
     scheduler.shutdown()

@@ -35,3 +35,4 @@ ta==0.11.0
 apscheduler==3.10.4
 httpx
 # python-jose[cryptography]==3.3.0
+psycopg2-binary==2.9.10  

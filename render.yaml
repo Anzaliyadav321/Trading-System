@@ -10,10 +10,23 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: SECRET_KEY
-        generateValue: true
+        value: 8eaf6b8f3b9a4f048c18c0f88e9fbc2c2b3f31bb4c20e21a2d41c8a3b2d9f10e
       - key: ALGORITHM
         value: HS256
-      - key: MAIL_FROM
-        sync: false
-      - key: MAIL_PASSWORD
-        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trading-system-db
+          property: connectionString
+      - key: BREVO_API_KEY
+        value: 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
+      - key: BREVO_SENDER_EMAIL
+        value: trade8561@gmail.com
+      - key: BREVO_SENDER_NAME
+        value: Trading System
+
+databases:
+  - name: trading-system-db
+    databaseName: trading_db
+    user: trading_user
+    plan: free
+    region: oregon
