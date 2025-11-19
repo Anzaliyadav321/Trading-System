@@ -1,36 +1,30 @@
 #backend/main.py
+from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from datetime import datetime, timedelta, date
-from jose import jwt, JWTError
-import bcrypt, random, os
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Boolean, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session, relationship
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from datetime import datetime, timedelta, timezone
 import pandas as pd
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from dotenv import load_dotenv
-from pathlib import Path  
-
-
-# Local imports
-from backend.core.database import Base, engine, SessionLocal
-from backend.core.auth.models import (
-    User, Order, OrderType, StopLossPosition, StopLossStatus,
-    UserPortfolio, Position, DailyEntry, PositionStatus  # ADDED NEW MODELS
-)
-from backend.core.auth.schemas import StopLossCreate
-from backend.core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
-from backend.core.auth.email_service import send_verification_email
-
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+import pytz
+import os
 import subprocess
+
+# File paths for signals
+BACKEND_DIR = Path(__file__).resolve().parent
+MASTER_PATH = BACKEND_DIR / "core" / "data" / "Master_data.csv"
+ALL_SIGNALS_PATH = BACKEND_DIR / "core" / "data" / "all_signals.csv"
 
 # Load environment variables
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
-MASTER_PATH = Path(__file__).resolve().parent / "core" / "data" / "Master_data.csv"
-ALL_SIGNALS_PATH = Path(__file__).resolve().parent / "core" / "data" / "all_signals.csv"
 
 # App initialization
 app = FastAPI(title="Trading System with JWT + OTP + DB Orders", version="1.0.0")
@@ -430,24 +424,7 @@ async def recalculate_signals_with_thresholds(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Recalculate signals with different indicator combinations.
-    
-    PO's thresholds are FIXED:
-    - RSI >= 60
-    - Close > MA50
-    - MACD > Signal
-    - Volume >= 1.1× Prev
-    
-    What you CAN change:
-    - Which indicators to check (enable/disable)
-    
-    Request body:
-    {
-        "enable_rsi": true,
-        "enable_ma": true,
-        "enable_macd": false,  // Test without MACD
-        "enable_volume": true
-    }
+    Recalculate signals with different indicator configurations.
     """
     try:
         # Extract parameters with defaults (all enabled)
@@ -455,12 +432,15 @@ async def recalculate_signals_with_thresholds(
         enable_ma = bool(request.get("enable_ma", True))
         enable_macd = bool(request.get("enable_macd", True))
         enable_volume = bool(request.get("enable_volume", True))
+        rsi_threshold = float(request.get("rsi_threshold", 60))
+        ma_buffer = float(request.get("ma_buffer", 0))
+        volume_multiplier = float(request.get("volume_multiplier", 1.1))
         
-        print(f"\n[INFO] Recalculating with indicator configuration:")
-        print(f"   - RSI Check: {'✓ Enabled' if enable_rsi else '✗ Disabled'}")
-        print(f"   - MA50 Check: {'✓ Enabled' if enable_ma else '✗ Disabled'}")
+        print(f"\n[INFO] Recalculating with configuration:")
+        print(f"   - RSI Check: {'✓ Enabled' if enable_rsi else '✗ Disabled'} (Threshold: {rsi_threshold})")
+        print(f"   - MA50 Check: {'✓ Enabled' if enable_ma else '✗ Disabled'} (Buffer: {ma_buffer}%)")
         print(f"   - MACD Check: {'✓ Enabled' if enable_macd else '✗ Disabled'}")
-        print(f"   - Volume Check: {'✓ Enabled' if enable_volume else '✗ Disabled'}")
+        print(f"   - Volume Check: {'✓ Enabled' if enable_volume else '✗ Disabled'} (Multiplier: {volume_multiplier}×)")
         
         # Load master data (don't modify it)
         master_df = pd.read_csv(MASTER_PATH)
@@ -478,6 +458,9 @@ async def recalculate_signals_with_thresholds(
         from backend.core.signals.buy_signals import generate_buy_signals
         new_signals_df = generate_buy_signals(
             df_latest,
+            rsi_threshold=rsi_threshold,
+            ma_buffer=ma_buffer,
+            volume_multiplier=volume_multiplier,
             enable_rsi=enable_rsi,
             enable_ma=enable_ma,
             enable_macd=enable_macd,
@@ -549,7 +532,10 @@ async def recalculate_signals_with_thresholds(
                 "enable_ma": enable_ma,
                 "enable_macd": enable_macd,
                 "enable_volume": enable_volume,
-                "rules": "RSI>=60, Close>MA50, MACD>Signal, Volume>=1.1×Prev (FIXED)"
+                "rsi_threshold": rsi_threshold,
+                "ma_buffer": ma_buffer,
+                "volume_multiplier": volume_multiplier,
+                "rules": f"RSI≥{rsi_threshold}, MA50+{ma_buffer}%, Vol≥{volume_multiplier}×"
             }
         }
         
@@ -561,9 +547,7 @@ async def recalculate_signals_with_thresholds(
             status_code=500,
             detail=f"Failed to recalculate: {str(e)}"
         )
-# ============================================
 # STOP LOSS POSITION MANAGEMENT (FIXED)
-# ============================================
 
 @app.post("/stop-loss/create")
 async def create_stop_loss_position(

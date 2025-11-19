@@ -143,6 +143,9 @@ def check_buy_conditions(
 
 def generate_buy_signals(
     df: pd.DataFrame,
+    rsi_threshold: float = 60.0, 
+    ma_buffer: float = 0.0,          
+    volume_multiplier: float = 1.1,
     enable_rsi: bool = True,
     enable_ma: bool = True,
     enable_macd: bool = True,
