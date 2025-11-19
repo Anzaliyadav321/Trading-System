@@ -5,9 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime, timedelta, date
 from jose import jwt, JWTError
+from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from dotenv import load_dotenv
 from pathlib import Path  
 import bcrypt, random, os
 import pandas as pd
@@ -27,14 +27,14 @@ from backend.core.auth.email_service import send_verification_email
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
 
+# Load environment variables
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
+
+
 # File paths for signals
 BACKEND_DIR = Path(__file__).resolve().parent
 MASTER_PATH = BACKEND_DIR / "core" / "data" / "Master_data.csv"
 ALL_SIGNALS_PATH = BACKEND_DIR / "core" / "data" / "all_signals.csv"
-
-# Load environment variables
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
-
 
 # App initialization
 app = FastAPI(title="Trading System with JWT + OTP + DB Orders", version="1.0.0")
