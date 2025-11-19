@@ -1,167 +1,286 @@
-date,symbol,open,high,low,close,volume,change_percent,source,timestamp,RSI,MA50,MACD,MACD_Signal,Prev_Volume,RSI_OK,MA_OK,MACD_OK,VOLUME_OK,Buy_Signal,Recommendation
-2025-11-13,ADBL,313.0,312.0,313.0,312.0,144.0,-0.32,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,AHL,597.0,586.1,597.0,595.0,140.0,-2.22,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,AHPC,278.0,278.0,278.0,278.0,536.0,0.18,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,AKJCL,188.0,188.0,188.0,188.0,78.0,1.08,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,ALBSL,975.0,966.3,966.3,975.0,34.0,-1.12,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,ALICL,472.0,462.6,472.0,462.6,315.0,-0.52,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,ANLB,6110.1,6070.0,6070.0,6110.0,40.0,-1.23,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,API,282.0,277.0,277.0,282.0,1325.0,1.08,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BANDIPUR,379.2,344.5,344.5,379.2,70.0,9.98,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BARUN,346.0,342.0,346.0,346.0,9305.0,1.76,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BEDC,669.0,620.0,669.0,635.0,6001.0,-6.89,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BFC,512.0,475.0,483.3,484.5,410.0,-1.74,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BGWT,770.0,756.0,756.0,756.0,290.0,0.05,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BHCL,438.0,436.9,436.9,437.3,510.0,-1.73,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BHDC,489.6,475.6,475.6,485.0,856.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BHL,176.0,175.0,176.0,175.0,1772.0,-1.13,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BHPL,680.7,680.7,680.7,680.7,10.0,1.6,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BNHC,420.0,420.0,420.0,420.0,10.0,0.02,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BPCL,714.0,691.0,691.0,710.0,2398.0,0.71,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,BUNGAL,442.5,410.3,410.3,442.5,1040.0,9.99,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CGH,876.0,842.8,842.8,876.0,30.0,1.86,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CHCL,490.4,484.0,484.0,484.1,159.0,-1.2,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CHDC,2304.0,2216.8,2216.8,2278.9,2149.0,0.75,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CHL,244.9,240.1,240.1,244.9,20.0,-0.04,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CIT,1830.0,1822.0,1822.0,1830.0,102.0,0.44,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CITY,536.3,536.3,536.3,536.3,10.0,-1.99,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CLI,469.0,459.0,464.0,459.0,46.0,-1.08,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CORBL,1700.0,1669.1,1669.1,1700.0,50.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CREST,1214.0,1214.0,1214.0,1214.0,410.0,-0.07,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CYCL,1500.1,1500.0,1500.0,1500.0,123.0,-0.73,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,CZBIL,187.0,187.0,187.0,187.0,20.0,-0.8,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,DDBL,854.0,850.0,850.0,854.0,100.0,1.3,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,DHEL,520.0,502.0,520.0,517.0,8750.0,-0.98,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,DHPL,283.2,283.2,283.2,283.2,10.0,-1.67,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,DLBS,1306.1,1305.1,1306.1,1305.1,52.0,-1.95,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,DORDI,263.1,253.1,263.1,260.1,185.0,0.81,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,EBL,638.0,638.0,638.0,638.0,100.0,0.63,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,EDBL,596.3,573.4,573.4,596.3,1220.0,1.91,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,EHPL,433.0,433.0,433.0,433.0,10.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,FMDBL,838.0,821.9,821.9,838.0,30.0,-0.06,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,GBIME,227.9,225.6,226.0,225.6,5039.0,0.04,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,GFCL,570.1,562.6,562.6,570.09,487.0,-0.68,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,GHL,214.0,214.0,214.0,214.0,20.0,0.8,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,GILB,1208.0,1208.0,1208.0,1208.0,200.0,1.67,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,GRDBL,1020.0,1010.0,1020.0,1020.0,1110.0,-0.49,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,GSY,8.96,8.95,8.95,8.96,200.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,GVL,512.0,502.2,502.2,512.0,222.0,-0.08,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HATHY,920.0,920.0,920.0,920.0,14.0,0.01,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HBL,189.8,187.0,189.8,188.0,1252.0,-1.21,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HDHPC,172.1,172.0,172.0,172.1,280.0,-0.52,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HDL,1140.0,1118.0,1135.0,1136.0,16682.0,-1.39,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HHL,325.2,325.2,325.2,325.2,150.0,-1.45,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HIDCL,277.1,256.1,256.1,263.0,300.0,0.69,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HIDCLP,182.5,180.9,180.9,182.0,1110.0,0.61,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HIMSTAR,597.0,595.0,595.0,597.0,60.0,-0.33,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HLI,368.0,368.0,368.0,368.0,510.0,-0.49,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HPPL,484.0,475.3,475.3,484.0,1150.0,-0.21,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HRL,806.8,791.0,806.8,794.0,1648.0,0.38,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,HURJA,225.8,225.8,225.8,225.8,10.0,1.71,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,ICFC,622.5,622.5,622.5,622.5,10.0,2.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,ILBS,1156.0,1156.0,1156.0,1156.0,10.0,1.76,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,ILI,461.0,448.8,461.0,448.8,72.0,-0.71,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,JBBL,321.0,310.0,310.0,312.2,371.0,-1.3,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,JBLB,1450.0,1423.0,1423.0,1447.0,2913.0,1.69,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,JOSHI,305.0,305.0,305.0,305.0,10.0,-0.88,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,KBL,182.0,178.3,178.3,181.0,3601.0,-0.49,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,KDBY,9.2,9.2,9.2,9.2,500.0,0.22,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,KDL,902.0,902.0,902.0,902.0,10.0,1.92,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,KKHC,245.0,245.0,245.0,245.0,20.0,1.83,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,KMCDB,980.0,980.0,980.0,980.0,10.0,-1.71,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,KPCL,558.9,539.0,539.0,558.9,530.0,1.62,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,LBBL,452.9,438.4,438.4,452.9,330.0,1.25,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,LEC,195.9,190.0,190.0,195.9,740.0,1.24,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,LICN,843.8,843.8,843.8,843.8,10.0,-0.73,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,LLBS,898.0,898.0,898.0,898.0,10.0,-1.97,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,LSL,221.9,213.5,213.5,221.9,1220.0,1.88,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MABEL,518.1,500.0,506.0,518.0,5640.0,0.35,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MBJC,278.0,272.8,272.8,276.0,100.0,-0.83,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MCHL,470.0,470.0,470.0,470.0,10.0,-1.9,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MEL,274.2,274.2,274.2,274.2,10.0,-1.4,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MEN,630.0,627.0,629.8,630.0,2055.0,0.8,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MERO,730.0,721.0,721.0,730.0,110.0,0.27,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MHNL,240.0,235.2,235.2,236.0,1130.0,-1.67,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MKCL,1399.0,1399.0,1399.0,1399.0,50.0,1.89,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MKJC,550.0,539.4,539.4,550.0,110.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,MSLB,1346.0,1346.0,1346.0,1346.0,10.0,-1.97,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NABBC,798.9,783.0,798.9,783.0,4100.0,-0.25,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NABIL,505.1,505.0,505.1,505.0,850.0,0.2,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NBL,240.0,240.0,240.0,240.0,12.0,0.84,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NFS,645.0,629.1,629.1,645.0,361.0,0.48,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NGPL,379.0,370.1,379.0,370.1,820.0,-0.48,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NICA,314.0,309.0,312.0,314.0,3248.0,0.71,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NIFRA,267.3,265.0,265.0,265.2,394.0,0.08,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NIMB,191.0,191.0,191.0,191.0,42.0,-1.29,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NLIC,797.8,782.2,782.2,797.3,920.0,-0.09,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NMFBS,1300.0,1274.0,1275.0,1274.0,21509.0,1.84,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NMIC,1354.0,1274.0,1354.0,1274.0,885.0,-4.07,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NMLBBL,627.0,627.0,627.0,627.0,10.0,-0.79,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NRIC,1339.0,1291.8,1291.8,1320.0,690.0,0.15,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NRM,423.8,423.8,423.8,423.8,30.0,2.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NRN,2014.0,2000.0,2010.0,2009.0,2628.0,0.7,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NWCL,777.0,777.0,777.0,777.0,20.0,-1.4,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,NYADI,381.1,381.1,381.1,381.1,10.0,-1.75,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,OMPL,1124.19,1124.19,1124.19,1124.19,10.0,-0.78,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,PHCL,355.0,350.0,354.0,355.0,45.0,-1.66,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,PMLI,482.0,474.0,482.0,474.0,12.0,-1.66,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,PPL,361.0,351.0,351.0,354.1,11709.0,-1.01,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,PRVU,189.0,189.0,189.0,189.0,210.0,0.05,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,RADHI,759.9,735.0,759.9,740.0,13559.0,-0.67,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,RFPL,344.6,341.0,341.0,344.6,20.0,-0.72,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,RHGCL,248.0,240.1,240.1,248.0,540.0,1.22,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,RHPL,268.0,265.0,266.0,265.0,439.0,-0.38,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,RIDI,221.9,221.9,221.9,221.9,50.0,0.41,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,RNLI,469.2,457.0,460.0,457.0,2731.0,-0.65,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,RSY,8.92,8.9,8.9,8.92,200.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,RURU,830.0,740.0,740.1,743.0,3296.0,-1.56,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SADBL,387.0,386.1,387.0,386.1,38.0,-1.83,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SAGAR,476.9,476.9,476.9,476.9,10.0,1.99,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SAHAS,670.0,665.1,670.0,669.9,10175.0,0.86,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SANIMA,306.9,300.0,303.9,300.0,1800.0,-0.33,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SANVI,580.0,574.3,574.3,575.0,150.0,-0.86,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SARBTM,918.0,899.6,918.0,899.6,170.0,-0.04,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SBCF,8.85,8.85,8.85,8.85,100.0,-1.23,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SBL,334.9,334.9,334.9,334.9,10.0,1.86,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SEF,9.43,9.43,9.43,9.43,100.0,1.95,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SGHC,333.0,333.0,333.0,333.0,20.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SHEL,286.0,282.4,282.4,286.0,3220.0,0.35,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SHINE,404.9,404.8,404.8,404.9,250.0,0.47,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SHIVM,605.0,588.4,588.4,603.0,608.0,0.45,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SHL,547.0,547.0,547.0,547.0,100.0,1.02,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SHLB,1850.0,1850.0,1850.0,1850.0,10.0,1.98,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SHPC,502.0,502.0,502.0,502.0,20.0,0.62,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SIKLES,649.7,630.0,631.0,639.0,65.0,0.31,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SJLIC,424.1,424.1,424.1,424.1,10.0,-0.82,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SLBBL,844.1,844.1,844.1,844.1,1.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SMATA,776.0,775.2,776.0,775.2,46.0,-0.1,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SMFBS,1709.0,1709.0,1709.0,1709.0,10.0,1.73,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SMH,762.0,762.0,762.0,762.0,10.0,1.8,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SMHL,809.8,764.0,779.1,800.0,40.0,0.64,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SMJC,500.0,500.0,500.0,500.0,10.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SMPDA,886.0,886.0,886.0,886.0,45.0,-1.99,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SNLI,471.6,471.6,471.6,471.6,2.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SONA,411.1,410.1,410.1,411.0,1130.0,0.05,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SPDL,410.0,408.0,408.0,408.0,3535.0,0.49,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SPHL,493.3,493.3,493.3,493.3,10.0,-1.93,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SRLI,387.1,385.0,385.0,387.1,892.0,0.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SWASTIK,419.9,419.9,419.9,419.9,10.0,-0.4,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SWBBL,796.0,796.0,796.0,796.0,10.0,1.91,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,SWMF,690.0,685.0,687.0,690.0,13880.0,1.62,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,TAMOR,462.8,462.8,462.8,462.8,10.0,-0.71,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,TPC,326.0,326.0,326.0,326.0,300.0,-0.28,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,TRH,700.0,699.8,699.9,699.8,1025.0,-0.17,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,TSHL,701.8,701.7,701.8,701.7,159.0,1.84,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,TTL,706.0,705.0,706.0,706.0,180.0,-0.16,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,UAIL,443.0,442.0,442.0,442.8,50.0,-1.82,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,ULBSL,4069.0,3848.5,3848.5,3848.5,60.0,-2.0,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,ULHC,427.0,427.0,427.0,427.0,10.0,-0.14,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,UMHL,534.0,515.5,515.5,525.1,160.0,-0.17,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,UNHPL,521.9,521.9,521.9,521.9,410.0,0.19,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,UPCL,362.4,355.0,355.0,362.0,2368.0,0.19,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,UPPER,175.0,174.0,175.0,174.0,161.0,-0.29,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,USHEC,486.0,482.0,486.0,482.0,1120.0,-0.72,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,USHL,720.0,710.0,714.0,719.9,1500.0,2.84,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,USLB,1924.0,1886.0,1924.0,1886.0,80.0,-0.16,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,VLUCL,549.0,549.0,549.0,549.0,10.0,-1.96,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
-2025-11-13,WNLB,1999.0,1999.0,1999.0,1999.0,10.0,1.99,merolagani_daily,2025-11-13 11:12:51,,,,,,False,False,False,False,False,REJECT
+date,symbol,open,high,low,close,volume,change_percent,source,timestamp,RSI,MA50,MACD,MACD_Signal,Prev_Volume,RSI_OK,MA_OK,MACD_OK,VOLUME_OK,Buy_Signal,Recommendation,check_rsi,check_ma,check_macd,check_volume
+2025-11-19,ACLBSL,1001.0,972.3,972.3,985.0,1197.0,-0.4,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ADBL,316.9,311.6,314.0,314.5,24019.0,0.26,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,AHL,646.0,588.0,588.0,607.5,9378.0,1.25,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,AHPC,283.0,279.3,281.7,281.0,52839.0,0.93,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,AKJCL,190.0,185.0,185.0,188.1,30468.0,1.13,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,AKPL,246.0,240.1,243.0,243.0,60603.0,1.46,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ALBSL,1039.0,992.7,992.7,1039.0,32770.0,2.58,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ALICL,458.8,445.1,450.1,451.0,60161.0,0.22,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ANLB,6174.8,6075.3,6075.3,6174.8,124.0,1.64,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,API,284.0,280.0,280.0,282.0,70131.0,0.71,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,AVYAN,993.0,960.0,960.0,970.0,1342.0,-0.41,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BANDIPUR,504.6,467.6,467.6,504.6,1540.0,9.98,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BARUN,353.5,336.0,337.9,347.9,450595.0,4.1,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BBC,4935.0,4868.0,4935.0,4898.0,81.0,0.06,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BEDC,595.1,570.1,583.4,585.0,20964.0,0.86,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BFC,494.0,465.0,474.0,471.0,14445.0,1.29,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BGWT,766.0,753.1,753.1,757.1,1475.0,0.28,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BHCL,465.0,446.0,453.9,464.0,62716.0,4.27,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BHDC,492.6,468.0,470.0,486.8,54795.0,2.05,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BHL,182.0,180.0,180.0,181.0,60578.0,1.4,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BHPL,668.3,655.6,660.0,666.9,1505.0,1.03,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BNHC,433.9,426.0,430.0,432.0,5726.0,1.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BNT,11570.0,11210.0,11210.0,11275.0,171.0,-1.1,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BPCL,755.0,730.0,740.0,731.0,122730.0,-0.81,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,BUNGAL,588.8,535.0,545.9,588.8,40870.0,9.99,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CBBL,1006.9,999.0,1004.0,1002.0,12046.0,0.9,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CFCL,482.9,470.2,480.0,476.0,27572.0,0.42,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CGH,869.9,850.0,860.0,861.0,19039.0,0.46,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CHCL,488.8,477.0,477.0,482.5,55715.0,-0.31,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CHDC,2335.0,2265.0,2265.0,2280.0,25589.0,-0.39,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CHL,261.9,250.9,250.9,259.0,49633.0,1.17,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CIT,1830.0,1817.0,1817.0,1822.3,4820.0,0.29,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CITY,535.0,526.1,530.0,526.2,4909.0,-0.72,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CKHL,598.0,575.1,592.4,575.1,3855.0,-0.98,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CLI,468.0,456.1,456.1,460.0,11192.0,0.24,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CORBL,1875.0,1780.0,1787.0,1857.0,9787.0,1.87,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CREST,1256.9,1213.0,1213.0,1245.9,7048.0,0.72,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CYCL,1519.0,1488.7,1515.9,1500.0,1161.0,0.67,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,CZBIL,190.0,186.5,188.2,190.0,39601.0,1.55,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,DDBL,852.8,837.0,840.0,846.0,5565.0,1.18,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,DHEL,555.0,538.1,545.8,541.1,44476.0,0.39,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,DHPL,306.0,288.1,288.1,299.0,30484.0,2.75,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,DLBS,1359.0,1316.0,1359.0,1330.0,318.0,-0.37,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,DOLTI,526.3,512.1,512.1,519.0,7425.0,0.6,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,DORDI,270.0,258.7,258.7,262.9,113945.0,-0.38,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,EBL,646.0,636.0,636.1,640.0,25395.0,0.79,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,EDBL,608.0,588.0,600.0,603.0,11296.0,1.52,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,EHPL,431.0,408.0,408.0,420.0,53418.0,1.01,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ENL,915.0,882.2,882.2,908.9,535.0,2.12,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,FMDBL,852.0,825.0,825.0,838.0,31533.0,0.98,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,FOWAD,1088.1,1061.0,1061.0,1084.6,1817.0,0.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GBBL,378.4,370.0,374.0,375.0,36662.0,1.11,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GBIME,227.0,224.1,224.1,224.5,52253.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GCIL,433.0,425.0,431.0,426.0,10637.0,-0.26,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GFCL,588.0,577.1,587.0,577.1,4798.0,0.19,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GHL,217.5,213.0,213.0,215.9,34316.0,2.32,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GILB,1229.4,1207.0,1220.0,1225.0,4115.0,0.57,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GLBSL,2050.0,2025.0,2045.0,2049.0,237.0,0.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GLH,261.0,249.3,249.3,259.6,19859.0,2.08,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GMFBS,1520.0,1500.0,1500.0,1519.9,96.0,2.63,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GMFIL,460.0,446.9,455.0,454.0,16642.0,1.57,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GMLI,1964.0,1850.0,1887.9,1850.1,3576.0,-0.05,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GRDBL,1176.6,1050.0,1070.0,1115.0,49520.0,2.29,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GSY,9.12,8.83,8.92,8.88,2800.0,-0.78,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GUFL,515.0,505.0,515.0,509.0,8584.0,0.79,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,GVL,545.0,528.0,535.0,531.0,58668.0,-0.75,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HATHY,925.0,901.1,901.2,920.0,8547.0,1.13,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HBL,189.5,185.0,185.0,187.2,42111.0,0.16,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HDHPC,176.0,173.1,175.0,173.9,38553.0,0.4,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HDL,1130.0,1118.0,1128.0,1121.0,27107.0,0.19,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HEI,494.0,476.0,494.0,482.7,7255.0,-0.37,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HHL,340.0,327.1,327.1,338.0,23223.0,1.96,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HIDCL,272.8,260.2,269.0,267.7,158170.0,1.48,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HIDCLP,190.2,183.4,184.5,184.3,233594.0,0.71,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HIMSTAR,678.3,622.0,622.0,676.9,31242.0,8.7,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HLBSL,900.0,895.3,895.3,900.0,1658.0,0.56,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HLI,376.9,369.0,369.0,373.0,47332.0,1.08,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HLICF,9.1,8.93,8.93,9.1,1800.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HPPL,494.0,474.0,490.2,476.0,106544.0,-2.78,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HRL,806.0,792.1,792.1,797.0,73378.0,0.62,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,HURJA,229.5,225.3,225.5,227.2,139208.0,1.34,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ICFC,634.0,620.0,624.0,630.0,6682.0,2.11,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,IGI,413.9,407.0,413.9,410.0,7752.0,0.74,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,IHL,559.0,509.7,510.0,532.4,2608.0,2.36,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ILBS,1132.0,1101.0,1101.1,1102.0,3803.0,-0.72,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ILI,460.0,453.1,454.5,455.6,16385.0,0.24,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,JBBL,320.6,305.5,305.5,316.0,14091.0,1.38,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,JBBLPO,187.0,187.0,187.0,187.0,1862.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,JBLB,1470.0,1450.0,1450.0,1460.0,13524.0,0.69,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,JFL,438.2,425.1,437.9,430.2,5883.0,0.09,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,JHAPA,376.5,349.1,349.1,376.5,110.0,9.99,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,JOSHI,363.1,340.0,345.0,347.0,166453.0,0.87,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,JSLBB,1142.7,1120.0,1122.0,1142.7,1385.0,1.84,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KBL,182.0,179.0,179.9,179.5,86784.0,0.28,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KBSH,1809.0,1800.0,1800.0,1809.0,71.0,0.78,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KDBY,9.15,8.85,8.85,9.15,3700.0,2.12,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KDL,890.0,873.0,876.0,889.0,2265.0,1.6,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KEF,8.95,8.73,8.95,8.8,1395.0,0.23,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KKHC,256.9,250.0,250.0,253.0,24860.0,1.61,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KMCDB,1010.0,982.0,982.0,1003.9,1142.0,0.69,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KPCL,569.9,560.0,565.0,563.8,19644.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KSBBL,433.6,427.0,427.0,429.2,10711.0,0.52,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,KSY,8.86,8.57,8.85,8.57,15700.0,-3.49,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,LBBL,469.5,452.1,453.2,458.9,114944.0,1.96,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,LEC,198.0,194.9,194.9,196.0,62776.0,1.08,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,LICN,865.0,851.0,865.0,851.0,6621.0,-0.35,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,LLBS,955.7,920.0,920.0,950.0,171.0,1.39,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,LSL,228.8,225.0,227.0,228.4,182877.0,1.24,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,LSLPO,111.0,111.0,111.0,111.0,6526.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,LUK,9.2,9.14,9.14,9.2,600.0,0.66,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MABEL,641.3,560.1,583.0,641.3,40588.0,10.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MAKAR,575.0,544.0,564.0,563.9,3653.0,1.95,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MANDU,790.0,780.1,785.0,781.0,1100.0,-0.13,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MATRI,970.0,946.0,946.0,963.1,733.0,-0.2,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MBJC,286.0,280.9,282.0,282.0,18360.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MBL,211.6,208.6,209.0,209.0,12200.0,-0.14,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MBLEF,9.0,8.75,8.9,9.0,14950.0,1.12,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MCHL,499.0,470.2,471.4,474.2,1436.0,0.59,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MDB,583.9,567.0,567.0,569.8,4184.0,1.21,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MEHL,417.8,410.3,412.0,413.0,7080.0,-0.24,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MEL,288.7,280.0,280.0,285.8,14639.0,0.32,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MEN,656.0,645.0,652.0,653.0,204148.0,1.56,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MERO,750.0,730.0,742.4,740.0,5991.0,1.65,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MFIL,589.0,577.4,589.0,581.9,8135.0,0.33,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MHCL,408.0,393.0,393.0,398.0,5414.0,0.66,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MHL,493.8,480.1,485.0,482.0,30411.0,0.21,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MHNL,256.0,239.8,244.5,255.5,44085.0,4.8,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MKCL,1369.9,1336.6,1360.0,1349.0,4299.0,0.22,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MKHC,392.0,363.0,363.0,380.0,4984.0,2.7,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MKHL,801.6,741.0,741.0,795.0,5699.0,5.24,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MKJC,546.6,534.0,535.9,540.0,16416.0,0.77,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MLBBL,1490.0,1460.4,1465.0,1479.0,776.0,0.82,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MLBL,385.5,380.4,381.0,383.9,30486.0,1.56,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MLBS,1545.0,1505.4,1505.4,1529.0,1040.0,-0.46,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MLBSL,2000.0,1961.0,2000.0,1990.0,335.0,1.47,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MMKJL,580.0,572.1,579.9,574.0,8811.0,0.7,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MNBBL,355.0,348.0,348.7,352.0,42886.0,1.44,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MPFL,546.0,533.0,540.6,540.0,5176.0,1.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MSHL,930.0,870.0,886.0,930.0,3197.0,7.04,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,MSLB,1400.0,1340.0,1366.0,1352.6,5451.0,0.36,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NABBC,846.0,810.0,810.0,840.0,30555.0,5.58,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NABIL,510.0,505.6,508.0,507.1,24383.0,-0.18,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NADEP,749.0,735.1,742.5,749.0,870.0,0.88,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NBL,240.9,236.0,240.8,238.0,40600.0,0.8,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NESDO,1520.0,1500.0,1509.0,1517.5,398.0,0.27,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NFS,677.0,658.0,669.0,670.4,37683.0,0.96,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NGPL,379.0,371.0,371.0,377.0,134012.0,1.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NHDL,700.0,676.6,677.0,697.0,4690.0,3.26,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NHPC,192.3,190.0,191.0,190.2,19027.0,0.63,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NIBLGF,8.47,8.31,8.35,8.46,800.0,-0.24,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NIBLSTF,8.44,8.14,8.2,8.35,3309.0,1.46,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NICA,309.6,306.3,306.3,309.0,34492.0,0.49,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NICBF,8.81,8.55,8.55,8.81,4000.0,1.97,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NICFC,8.7,8.63,8.63,8.7,1000.0,-1.14,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NICL,510.0,501.4,505.0,506.5,22984.0,0.2,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NICLBSL,558.7,546.2,555.9,551.0,9451.0,-0.18,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NICSF,8.55,8.38,8.39,8.39,22899.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NIFRA,280.0,269.0,269.0,277.5,358935.0,3.16,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NIFRAGED,1010.5,1010.5,1010.5,1010.5,25.0,-0.54,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NIL,582.0,571.6,571.6,580.0,8915.0,1.47,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NIMB,193.6,190.0,190.1,191.0,94623.0,0.21,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NIMBPO,161.4,155.5,158.0,155.5,14120.0,0.19,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NLG,701.9,681.0,690.0,697.9,52104.0,1.59,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NLIC,819.0,805.7,810.0,809.9,50992.0,0.67,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NLICL,610.0,602.0,602.0,604.9,16637.0,0.5,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NMB,237.9,235.0,237.0,236.0,50700.0,0.21,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NMBMF,669.0,657.0,669.0,667.0,362.0,0.91,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NMFBS,1300.0,1256.0,1275.0,1285.0,741.0,0.78,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NMIC,1300.0,1280.0,1280.0,1299.0,6023.0,0.15,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NMLBBL,637.0,630.0,637.0,631.2,4476.0,0.99,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NRIC,1364.9,1289.7,1289.7,1325.0,59606.0,0.68,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NRM,426.2,418.0,426.2,419.0,16370.0,0.26,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NRN,1970.0,1897.0,1897.0,1965.0,49708.0,1.55,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NTC,869.0,850.0,860.0,858.0,7307.0,0.23,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NUBL,749.0,737.0,740.0,738.3,9359.0,0.18,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NWCL,795.6,780.0,780.0,792.0,761.0,1.54,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,NYADI,404.9,385.2,385.2,404.9,13008.0,3.03,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,OHL,717.8,677.0,690.0,698.0,12334.0,-0.85,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,OMPL,1160.0,1131.5,1131.5,1140.0,4396.0,0.43,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PCBL,255.0,247.0,250.0,251.0,59959.0,0.8,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PFL,388.6,378.1,381.0,380.0,7794.0,1.06,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PHCL,343.5,331.4,338.0,335.0,25787.0,-0.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PMHPL,339.0,331.5,337.6,334.0,58524.0,0.91,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PMLI,490.0,481.5,482.0,489.0,5432.0,0.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PPCL,331.6,323.2,331.6,326.5,22737.0,0.15,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PPL,347.7,335.0,335.0,342.9,152899.0,0.7,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PRIN,663.9,653.0,653.0,662.7,4426.0,1.35,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PROFL,465.5,455.7,465.0,462.4,6831.0,1.18,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PRSF,10.35,10.0,10.0,10.31,3250.0,1.28,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PRVU,189.9,185.3,189.0,186.0,158356.0,-0.8,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PSF,10.15,10.04,10.04,10.06,12650.0,-0.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,PURE,814.0,789.7,800.0,795.0,8956.0,0.63,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RADHI,771.0,749.0,765.1,749.0,127990.0,-0.15,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RAWA,715.0,699.0,700.0,710.0,659.0,1.28,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RBCL,14980.0,14406.2,14406.3,14777.0,273.0,0.52,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RBCLPO,12207.0,11968.0,11968.0,12207.0,30.0,-0.03,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RFPL,370.0,360.8,360.8,365.0,27324.0,-0.82,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RHGCL,260.1,243.0,246.4,257.5,164286.0,4.5,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RHPL,270.3,265.0,270.3,265.0,13141.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RIDI,230.0,226.0,230.0,228.4,48210.0,0.71,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RLFL,438.9,425.2,431.0,427.3,9825.0,0.07,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RNLI,479.0,472.5,474.0,475.0,76235.0,0.25,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RSDC,620.0,611.0,619.0,611.0,7279.0,0.49,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RSY,9.02,8.8,8.8,9.0,23550.0,1.35,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,RURU,760.0,742.0,751.0,752.9,55900.0,0.25,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SADBL,404.7,397.5,398.0,398.5,19557.0,0.89,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SAGAR,684.4,634.6,634.6,684.4,450.0,10.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SAGF,9.72,9.53,9.72,9.7,1700.0,1.78,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SAHAS,692.7,680.0,692.7,691.0,332874.0,1.74,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SALICO,600.0,577.5,580.0,584.0,18220.0,0.69,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SANIMA,303.8,299.1,303.7,299.1,30377.0,-0.3,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SANVI,587.5,568.1,577.0,583.5,10074.0,1.13,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SAPDBL,861.9,825.0,830.0,830.0,73084.0,0.61,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SARBTM,916.0,895.0,900.0,896.0,19884.0,-0.33,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SBCF,9.1,9.01,9.01,9.05,12675.0,0.44,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SBI,395.0,385.1,385.1,394.5,25420.0,0.46,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SBL,329.7,321.7,327.0,324.0,66042.0,1.06,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SCB,639.5,633.0,633.0,636.2,10579.0,0.03,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SCBD,1227.0,1205.0,1227.0,1205.0,50.0,0.17,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SEF,9.2,9.0,9.02,9.05,67167.0,0.33,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SFCL,404.0,391.0,400.0,396.4,18768.0,-0.4,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SFEF,9.14,9.0,9.03,9.14,1500.0,1.33,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SFMF,10.0,9.97,9.97,10.0,18800.0,1.94,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SGHC,400.0,380.0,390.0,390.0,29017.0,0.26,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SGIC,465.9,457.1,457.1,461.9,6986.0,1.07,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SHEL,292.0,286.0,289.0,286.2,116355.0,0.42,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SHINE,409.5,402.3,406.0,406.0,13249.0,0.25,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SHINED,1171.0,1128.0,1128.0,1155.1,14343.0,0.43,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SHIVM,596.0,586.1,588.0,587.5,155626.0,0.43,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SHL,550.9,540.0,540.0,545.0,28435.0,0.37,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SHLB,1769.7,1720.0,1755.0,1748.0,1950.0,0.75,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SHPC,508.7,497.0,500.0,502.0,100624.0,1.03,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SICL,644.0,624.0,636.4,629.7,5783.0,0.91,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SIFC,510.9,485.0,491.0,493.7,9722.0,1.79,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SIKLES,653.7,639.0,652.0,642.0,39343.0,0.16,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SINDU,723.0,695.8,720.0,709.0,25879.0,0.0,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SJCL,285.0,281.0,285.0,284.8,8070.0,1.35,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SJLIC,440.0,426.0,433.0,433.0,19279.0,1.41,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SKBBL,859.0,830.0,859.0,830.0,28154.0,-1.78,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SLBBL,866.0,840.0,840.0,857.0,5367.0,2.02,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SLBSL,1322.0,1271.1,1271.1,1295.1,2693.0,-0.15,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SLCF,9.2,9.1,9.2,9.12,1250.0,0.22,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SMATA,794.9,784.6,785.0,789.0,7725.0,0.9,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SMB,2150.0,2120.0,2150.0,2139.0,215.0,0.42,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SMFBS,1695.0,1624.0,1662.0,1675.0,1229.0,2.76,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SMH,764.9,750.0,751.5,750.0,5595.0,-0.13,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SMHL,793.0,771.1,791.8,785.0,6625.0,1.03,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SMJC,519.9,490.3,490.3,512.9,19038.0,4.67,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SMPDA,929.0,864.0,864.0,890.0,3011.0,1.6,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SNLI,482.0,472.0,482.0,473.0,58144.0,-0.32,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SONA,422.0,414.0,414.0,419.5,23187.0,1.35,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SPC,469.0,460.0,461.0,465.0,10443.0,2.09,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SPDL,452.0,404.0,418.3,419.9,236605.0,1.92,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SPHL,510.0,483.5,483.5,504.0,6358.0,2.17,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SPIL,667.0,651.2,655.1,666.0,6848.0,1.6,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SPL,935.5,905.0,905.0,935.5,690.0,1.68,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SRLI,394.0,386.2,392.0,391.2,15671.0,1.22,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SSHL,168.0,165.0,167.0,165.8,57510.0,0.48,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,STC,5328.9,5260.0,5285.0,5309.0,1609.0,0.45,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SWASTIK,484.0,474.6,474.6,484.0,20.0,4.02,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SWBBL,794.0,780.0,787.0,780.0,7404.0,-0.52,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,SWMF,702.0,683.0,691.8,695.0,3689.0,0.46,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,TAMOR,479.0,466.1,475.0,473.0,5544.0,0.02,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,TPC,332.9,325.1,327.4,328.1,68204.0,0.98,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,TRH,700.0,682.0,695.0,695.0,4705.0,1.18,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,TSHL,694.0,677.2,689.9,679.0,1825.0,-1.01,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,TTL,720.0,709.1,709.1,711.0,21163.0,0.42,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,TVCL,419.0,409.1,419.0,417.6,3535.0,0.92,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UAIL,448.9,436.0,436.0,448.0,9450.0,0.92,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UHEWA,603.0,567.5,583.0,587.0,37935.0,1.38,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ULBSL,3855.0,3781.0,3855.0,3834.0,482.0,-0.54,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,ULHC,463.5,448.1,448.7,458.0,12726.0,0.66,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UMHL,534.9,525.0,525.0,533.0,30390.0,1.62,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UMRH,560.0,549.0,550.0,551.5,10083.0,0.29,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UNHPL,540.0,522.0,540.0,525.0,155398.0,-1.32,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UNL,47000.0,46800.0,47000.0,46990.0,70.0,-0.02,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UNLB,1975.0,1956.0,1970.0,1974.0,539.0,0.71,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UPCL,371.0,364.0,368.0,367.0,95705.0,0.58,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,UPPER,177.0,174.0,174.0,176.9,78002.0,1.43,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,USHEC,491.0,475.0,476.1,481.9,20831.0,0.82,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,USHL,703.0,683.5,703.0,693.0,1718.0,-0.29,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,USLB,1856.0,1796.0,1856.0,1796.0,11497.0,-1.32,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,VLBS,785.0,760.0,781.0,784.0,3023.0,2.35,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,VLUCL,571.2,550.0,565.0,559.0,4321.0,-0.18,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True
+2025-11-19,WNLB,2028.7,1949.4,2028.7,2007.0,409.0,0.9,merolagani_daily,2025-11-19 00:30:33,,,,,,False,False,False,False,False,REJECT - RSI nan < 60,True,True,True,True

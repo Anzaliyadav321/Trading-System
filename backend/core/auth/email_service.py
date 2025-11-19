@@ -47,13 +47,16 @@
 # for using brevo api instead of smtp
 # backend/core/auth/email_service.py
 
-import httpx
-import os
-from fastapi import HTTPException
+# backend/core/auth/email_service.py
 
-BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-BREVO_SENDER_EMAIL = os.getenv("MAIL_FROM", "trade8561@gmail.com")
-BREVO_SENDER_NAME = os.getenv("MAIL_FROM_NAME", "Trading System")
+import httpx
+from fastapi import HTTPException
+from backend.core.config import settings
+
+BREVO_API_KEY = settings.BREVO_API_KEY
+BREVO_SENDER_EMAIL = settings.BREVO_SENDER_EMAIL
+BREVO_SENDER_NAME = settings.BREVO_SENDER_NAME
+
 
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
@@ -100,4 +103,3 @@ async def send_verification_email(recipient_email: str, otp: str):
         )
 
     return {"message": "Verification email sent successfully"}
-

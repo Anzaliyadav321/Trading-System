@@ -1,28 +1,30 @@
 # backend/core/config.py
+
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import os
 
-# Explicitly load .env file from backend/
+# Force load .env from the backend/ folder
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # backend/core → backend/
-load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+load_dotenv(ENV_PATH)
+
+print(f"Loaded .env from: {ENV_PATH}")
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./trading.db")
+    DATABASE_URL: str
+    SECRET_KEY: str
+    BREVO_API_KEY: str
+    BREVO_SENDER_EMAIL: str
+    BREVO_SENDER_NAME: str
+    ALGORITHM: str = "HS256"
 
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your_super_secret_key_here")
-    # for api
-    BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-    BREVO_SENDER_EMAIL = os.getenv("MAIL_FROM", "trade8561@gmail.com")
-    BREVO_SENDER_NAME = os.getenv("MAIL_FROM_NAME", "Trading System")
-# for smtp
-    # MAIL_USERNAME: str = os.getenv("MAIL_USERNAME", "")
-    # MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD", "")
-    # MAIL_FROM: str = os.getenv("MAIL_FROM", "")
-    # MAIL_PORT: int = int(os.getenv("MAIL_PORT", 587))
-    # MAIL_SERVER: str = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    class Config:
+        env_file = ENV_PATH
+        env_file_encoding = 'utf-8'
 
 settings = Settings()
 
-# Debug check (optional)
-print(f"MAIL_FROM loaded as: {settings.MAIL_FROM}")
+print("BREVO API key:", settings.BREVO_API_KEY)
+print("MAIL FROM:", settings.BREVO_SENDER_EMAIL)
+print("MAIL FROM NAME:", settings.BREVO_SENDER_NAME)

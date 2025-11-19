@@ -10,39 +10,106 @@ import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from dotenv import load_dotenv
+from pathlib import Path  
+
 
 # Local imports
 from backend.core.database import Base, engine, SessionLocal
-from backend.core.auth.models import User, Order, OrderType, StopLossPosition, StopLossStatus
+from backend.core.auth.models import (
+    User, Order, OrderType, StopLossPosition, StopLossStatus,
+    UserPortfolio, Position, DailyEntry, PositionStatus  # ADDED NEW MODELS
+)
 from backend.core.auth.schemas import StopLossCreate
-# from backend.core.auth import email_service
 from backend.core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
 from backend.core.auth.email_service import send_verification_email
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
 import subprocess
-import os
 
 # Load environment variables
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
+
+MASTER_PATH = Path(__file__).resolve().parent / "core" / "data" / "Master_data.csv"
+ALL_SIGNALS_PATH = Path(__file__).resolve().parent / "core" / "data" / "all_signals.csv"
 
 # App initialization
 app = FastAPI(title="Trading System with JWT + OTP + DB Orders", version="1.0.0")
 
 def run_merolagani_pipeline():
-    script_path = os.path.join(os.getcwd(), "backend", "scripts", "merolagani_daily.py")
-    print(f"[INFO] Running merolagani_daily at {datetime.now()}")
-    subprocess.run(["python", script_path], check=True)
-
+    """
+    Daily scheduled job:
+    1. Scrape today's data from MeroLagani
+    2. Run full pipeline (append to master + generate signals)
+    3. Clear cache for fresh API responses
+    """
+    print(f"\n{'='*80}")
+    print(f"[INFO] Running daily update at {datetime.now()}")
+    print(f"{'='*80}")
+    
+    try:
+        # Step 1: Scrape today's data
+        script_path = os.path.join(os.getcwd(), "backend", "scripts", "merolagani_daily.py")
+        print(f"[INFO] Executing scraper: {script_path}")
+        subprocess.run(["python", script_path], check=True)
+        print("[INFO] Daily scrape completed")
+        
+        # Step 2: Run full pipeline (append + generate signals)
+        print("[INFO] Running full pipeline...")
+        from backend.core.pipeline.nepse_pipeline import run_pipeline
+        final_df, buy_signals = run_pipeline()
+        print(f"[INFO] Pipeline completed - {len(buy_signals)} buy signals generated")
+        
+        # Step 3: Clear cache so next API call gets fresh data
+        global _signals_cache, _cache_timestamp
+        _signals_cache = None
+        _cache_timestamp = None
+        print("[INFO] Signal cache cleared")
+        
+        print(f"{'='*80}\n")
+        
+    except Exception as e:
+        print(f"\n{'='*80}")
+        print(f"[ERROR]Daily pipeline failed: {e}")
+        print(f"{'='*80}\n")
+        import traceback
+        traceback.print_exc()
 # Initialize scheduler
 scheduler = BackgroundScheduler()
-scheduler.add_job(run_merolagani_pipeline, "cron", hour=14, minute=15)  #  runs daily at 8:00 pm as render time is utc
+scheduler.add_job(run_merolagani_pipeline, "cron", hour=14, minute=15)
 scheduler.start()
 
+# UPDATED STARTUP EVENT
 @app.on_event("startup")
 def startup_event():
-    print("[INFO] Scheduler started — merolagani_daily will run every day at 8:00 PM Nepali time")
+    print("\n" + "="*80)
+    print("INITIALIZING DATABASE...")
+    print("="*80)
+    
+    try:
+        # Import all models to ensure they're registered
+        from backend.core.auth import models
+        
+        # Create all tables
+        Base.metadata.create_all(bind=engine)
+        
+        print("Database tables created successfully!")
+        
+        # Verify tables were created
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        
+        print(f"\n Tables in database: {len(tables)}")
+        for table in tables:
+            print(f"   {table}")
+        print("="*80 + "\n")
+        
+        print("[INFO] Scheduler started — merolagani_daily will run every day at 8:00 PM Nepali time")
+        
+    except Exception as e:
+        print(f"Error creating tables: {e}")
+        import traceback
+        traceback.print_exc()
 
 @app.on_event("shutdown")
 def shutdown_event():
@@ -51,8 +118,6 @@ def shutdown_event():
 SECRET_KEY = os.getenv("SECRET_KEY", "your_super_secret_key_here")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
-
 
 # Allow CORS for frontend
 app.add_middleware(
@@ -143,6 +208,10 @@ class VerifyOTPRequest(BaseModel):
     email: str
     otp: str
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 class OrderBooking(BaseModel):
     symbol: str
     quantity: int
@@ -169,7 +238,6 @@ async def register_user(request: RegisterRequest, db: Session = Depends(get_db))
     db.add(new_user)
     db.commit()
 
-    # Make sure the function is awaited and async
     await send_verification_email(request.email, otp)
 
     return {"message": "User registered successfully. Please check your email for OTP."}
@@ -191,16 +259,15 @@ async def verify_otp(request: VerifyOTPRequest, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Email verified successfully. You can now log in."}
 
-@app.post("/auth/login")
-async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db=Depends(get_db)):
-    user = get_user_by_email(db, form_data.username)
-    if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
-    if not user.is_verified:
-        raise HTTPException(status_code=403, detail="Email not verified")
-
-    token_data = {"sub": user.email}
-    access_token = create_access_token(data=token_data)
+@app.post("/auth/login") 
+async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db=Depends(get_db)): 
+    user = get_user_by_email(db, form_data.username) 
+    if not user or not verify_password(form_data.password, user.hashed_password): 
+        raise HTTPException(status_code=400, detail="Invalid credentials") 
+    if not user.is_verified: 
+        raise HTTPException(status_code=403, detail="Email not verified") 
+    token_data = {"sub": user.email} 
+    access_token = create_access_token(data=token_data) 
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/auth/me")
@@ -333,6 +400,7 @@ async def refresh_signals(current_user: User = Depends(get_current_user)):
                 "macd_ok": bool(row.get("MACD_OK", False)),
                 "volume_ok": bool(row.get("VOLUME_OK", False))
             })
+
         
         # Update cache
         _signals_cache = formatted_signals
@@ -356,6 +424,143 @@ async def refresh_signals(current_user: User = Depends(get_current_user)):
             detail=f"Failed to refresh signals: {str(e)}"
         )
 
+@app.post("/signals/recalculate")
+async def recalculate_signals_with_thresholds(
+    request: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Recalculate signals with different indicator combinations.
+    
+    PO's thresholds are FIXED:
+    - RSI >= 60
+    - Close > MA50
+    - MACD > Signal
+    - Volume >= 1.1× Prev
+    
+    What you CAN change:
+    - Which indicators to check (enable/disable)
+    
+    Request body:
+    {
+        "enable_rsi": true,
+        "enable_ma": true,
+        "enable_macd": false,  // Test without MACD
+        "enable_volume": true
+    }
+    """
+    try:
+        # Extract parameters with defaults (all enabled)
+        enable_rsi = bool(request.get("enable_rsi", True))
+        enable_ma = bool(request.get("enable_ma", True))
+        enable_macd = bool(request.get("enable_macd", True))
+        enable_volume = bool(request.get("enable_volume", True))
+        
+        print(f"\n[INFO] Recalculating with indicator configuration:")
+        print(f"   - RSI Check: {'✓ Enabled' if enable_rsi else '✗ Disabled'}")
+        print(f"   - MA50 Check: {'✓ Enabled' if enable_ma else '✗ Disabled'}")
+        print(f"   - MACD Check: {'✓ Enabled' if enable_macd else '✗ Disabled'}")
+        print(f"   - Volume Check: {'✓ Enabled' if enable_volume else '✗ Disabled'}")
+        
+        # Load master data (don't modify it)
+        master_df = pd.read_csv(MASTER_PATH)
+        master_df['date'] = pd.to_datetime(master_df['date'])
+        
+        # Get latest date
+        latest_date = master_df['date'].max()
+        df_latest = master_df[master_df['date'] == latest_date]
+        
+        # Calculate indicators
+        from backend.core.technical_indicators.technicals import calculate_indicators
+        df_latest = calculate_indicators(df_latest)
+        
+        # Generate signals with NEW configuration
+        from backend.core.signals.buy_signals import generate_buy_signals
+        new_signals_df = generate_buy_signals(
+            df_latest,
+            enable_rsi=enable_rsi,
+            enable_ma=enable_ma,
+            enable_macd=enable_macd,
+            enable_volume=enable_volume
+        )
+        
+        # Load ORIGINAL signals for comparison
+        original_df = pd.read_csv(ALL_SIGNALS_PATH)
+        original_df['date'] = pd.to_datetime(original_df['date']).dt.date
+        original_today = original_df[original_df['date'] == latest_date.date()]
+        
+        # Compare results
+        comparison = []
+        for _, new_row in new_signals_df.iterrows():
+            symbol = new_row['symbol']
+            original_row = original_today[original_today['symbol'] == symbol].iloc[0] if len(original_today[original_today['symbol'] == symbol]) > 0 else None
+            
+            if original_row is not None:
+                changed = new_row['Recommendation'] != original_row['Recommendation']
+                comparison.append({
+                    "symbol": symbol,
+                    "price": float(new_row['close']),
+                    "rsi": float(new_row['RSI']) if pd.notna(new_row['RSI']) else None,
+                    "ma50": float(new_row['MA50']) if pd.notna(new_row['MA50']) else None,
+                    "macd": float(new_row['MACD']) if pd.notna(new_row['MACD']) else None,
+                    "volume": int(new_row['volume']) if pd.notna(new_row['volume']) else None,
+                    "original": {
+                        "recommendation": original_row['Recommendation'],
+                        "rsi_ok": bool(original_row['RSI_OK']),
+                        "ma_ok": bool(original_row['MA_OK']),
+                        "macd_ok": bool(original_row['MACD_OK']),
+                        "volume_ok": bool(original_row['VOLUME_OK'])
+                    },
+                    "new": {
+                        "recommendation": new_row['Recommendation'],
+                        "rsi_ok": bool(new_row['RSI_OK']),
+                        "ma_ok": bool(new_row['MA_OK']),
+                        "macd_ok": bool(new_row['MACD_OK']),
+                        "volume_ok": bool(new_row['VOLUME_OK'])
+                    },
+                    "changed": changed
+                })
+        
+        # Count changes
+        original_buy_count = len(original_today[original_today['Recommendation'] == 'BUY'])
+        new_buy_count = len(new_signals_df[new_signals_df['Recommendation'] == 'BUY'])
+        changes_count = len([c for c in comparison if c['changed']])
+        new_buys = len([c for c in comparison if c['changed'] and c['new']['recommendation'] == 'BUY'])
+        lost_buys = len([c for c in comparison if c['changed'] and c['original']['recommendation'] == 'BUY'])
+        
+        return {
+            "success": True,
+            "original_summary": {
+                "buy_count": original_buy_count,
+                "reject_count": len(original_today) - original_buy_count
+            },
+            "new_summary": {
+                "buy_count": new_buy_count,
+                "reject_count": len(new_signals_df) - new_buy_count
+            },
+            "changes": {
+                "total_changed": changes_count,
+                "new_buys": new_buys,
+                "lost_buys": lost_buys
+            },
+            "comparison_data": comparison,
+            "configuration_used": {
+                "enable_rsi": enable_rsi,
+                "enable_ma": enable_ma,
+                "enable_macd": enable_macd,
+                "enable_volume": enable_volume,
+                "rules": "RSI>=60, Close>MA50, MACD>Signal, Volume>=1.1×Prev (FIXED)"
+            }
+        }
+        
+    except Exception as e:
+        print(f"[ERROR] Recalculation failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to recalculate: {str(e)}"
+        )
 # ============================================
 # STOP LOSS POSITION MANAGEMENT (FIXED)
 # ============================================
@@ -397,11 +602,11 @@ async def create_stop_loss_position(
     new_position = StopLossPosition(
         user_email=current_user.email,
         symbol=position.symbol,
-        buy_price=position.entry_price,  # ✅ Map entry_price → buy_price
-        stoploss=position.stop_loss_price,  # ✅ Map stop_loss_price → stoploss
+        buy_price=position.entry_price,
+        stoploss=position.stop_loss_price,
         avg_price=position.avg_price if position.avg_price else position.entry_price,
         quantity=position.quantity,
-        remaining_qty=position.quantity,  # ✅ FIX: Use remaining_qty not remaining_quantity
+        remaining_qty=position.quantity,
         status=StopLossStatus.ACTIVE
     )
 
@@ -424,6 +629,7 @@ async def create_stop_loss_position(
             "created_at": new_position.created_at.isoformat()
         }
     }
+
 @app.get("/stop-loss/position/{symbol}")
 async def get_stop_loss_position(
     symbol: str,
@@ -453,18 +659,18 @@ async def get_stop_loss_position(
     ).all()
     
     sold_today = sum(o.quantity for o in today_sells)
-    quantity_sold = position.quantity - position.remaining_qty  # Calculate sold amount
+    quantity_sold = position.quantity - position.remaining_qty
     
     return {
         "has_position": True,
         "position": {
             "id": position.id,
             "symbol": position.symbol,
-            "total_quantity": position.quantity,  # Total originally bought
-            "quantity_sold": quantity_sold,  # Calculate sold amount
-            "remaining_quantity": position.remaining_qty,  # What's left to sell
-            "entry_price": position.buy_price,  # Consistent naming
-            "stop_loss_price": position.stoploss,  # Consistent naming
+            "total_quantity": position.quantity,
+            "quantity_sold": quantity_sold,
+            "remaining_quantity": position.remaining_qty,
+            "entry_price": position.buy_price,
+            "stop_loss_price": position.stoploss,
             "avg_price": position.avg_price,
             "status": position.status.value,
             "sold_today": sold_today
@@ -488,10 +694,8 @@ async def update_stop_loss_after_sell(
     if not position:
         raise HTTPException(status_code=404, detail="Position not found")
     
-    # Update quantities
     position.remaining_qty -= quantity_sold
     
-    # Update status based on remaining quantity
     if position.remaining_qty <= 0:
         position.status = StopLossStatus.FULLY_SOLD
         position.remaining_qty = 0
@@ -573,11 +777,9 @@ async def book_order(
         ).first()
         
         if sl_position:
-            # Update remaining quantity
             sl_position.remaining_qty -= order.quantity
             sl_position.updated_at = datetime.utcnow()
             
-            # Update status
             if sl_position.remaining_qty <= 0:
                 sl_position.status = StopLossStatus.FULLY_SOLD
                 sl_position.remaining_qty = 0
@@ -710,6 +912,3 @@ async def get_today_summary(
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-
-# Initialize database tables
-Base.metadata.create_all(bind=engine)

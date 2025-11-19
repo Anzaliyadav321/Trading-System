@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
+# backend/core/scrapper/merolagani_daily.py
 
 # In[1]:
 

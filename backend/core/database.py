@@ -16,3 +16,16 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+# -----------------------------------------------------
+# IMPORT ALL MODELS HERE
+# -----------------------------------------------------
+# This ensures SQLAlchemy detects the tables and creates them
+from backend.core.auth import models
+
+
+# -----------------------------------------------------
+# CREATE ALL DATABASE TABLES (no Alembic)
+# -----------------------------------------------------
+# Base.metadata.create_all(bind=engine)

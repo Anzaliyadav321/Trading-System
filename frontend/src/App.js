@@ -49,28 +49,26 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const formData = new URLSearchParams();
-    formData.append('username', email);
-    formData.append('password', password);
-    formData.append('grant_type', 'password');
-    
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/x-www-form-urlencoded'
+    formData.append("username", email);
+    formData.append("password", password);
+
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {  //Fixed URL
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: formData
+      body: formData,
     });
 
-    const data = await response.json();
-    
-    if (!response.ok) {
+    const data = await res.json();  // Fixed variable name
+
+    if (!res.ok) {  // Fixed variable name
       throw new Error(data.detail || 'Login failed');
     }
 
     setToken(data.access_token);
     return data;
-  };
-
+   };
   const register = async (email, password) => {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
@@ -173,7 +171,20 @@ const apiService = {
     });
     if (!response.ok) throw new Error('Failed to fetch all order history');
     return response.json();
-  }
+  },
+
+  async recalculateSignals(token, thresholds) {
+  const response = await fetch(`${API_BASE_URL}/signals/recalculate`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(thresholds)
+  });
+  if (!response.ok) throw new Error('Failed to recalculate signals');
+  return response.json();
+}
 };
 
 // ============================================
@@ -835,7 +846,7 @@ const BookSellPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
 
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
             <div className="text-xs text-blue-700 font-medium space-y-1">
-              <div>📊 <span className="font-semibold">Summary</span></div>
+              <div><span className="font-semibold">Summary</span></div>
               <div>From {availableToSell} available, selling {quantity || 0} shares today</div>
               <div>Remaining after sale: {availableToSell - (quantity || 0)} shares</div>
               {soldToday > 0 && (
@@ -1564,6 +1575,546 @@ const OddLotBalance = ({ oddLots }) => {
   );
 };
 
+// Component 7: Signal Analysis & Backtesting
+
+const SignalAnalysis = ({ token, signals }) => {
+  const [activeTab, setActiveTab] = useState('historical');
+  const [historicalSubTab, setHistoricalSubTab] = useState('buy'); // 'buy', 'sell', 'all'
+  const [thresholds, setThresholds] = useState({
+    rsi_threshold: 60,
+    ma_buffer: 0,
+    volume_multiplier: 1.1,
+    enable_rsi: true,
+    enable_ma: true,
+    enable_macd: true,
+    enable_volume: true
+  });
+  const [comparisonData, setComparisonData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleRecalculate = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/signals/recalculate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(thresholds)
+      });
+      const data = await response.json();
+      setComparisonData(data);
+    } catch (error) {
+      alert('Error recalculating: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter signals based on sub-tab
+  const getFilteredSignals = () => {
+    if (!signals || signals.length === 0) return [];
+    
+    switch (historicalSubTab) {
+      case 'buy':
+        return signals.filter(s => s.signal === 'BUY' || s.recommendation === 'BUY');
+      case 'sell':
+        return [];
+      case 'all':
+        return signals;
+      default:
+        return signals;
+    }
+  };
+
+  const filteredSignals = getFilteredSignals();
+
+  return (
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-6">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl flex items-center justify-center text-sm font-bold mr-4 shadow-sm">
+          7
+        </div>
+        Signal Analysis & Backtesting
+      </h2>
+
+      {/* Main Tabs */}
+      <div className="flex space-x-2 mb-6 border-b border-gray-200">
+        <button
+          onClick={() => setActiveTab('historical')}
+          className={`px-6 py-3 font-semibold transition-all ${
+            activeTab === 'historical'
+              ? 'text-indigo-600 border-b-2 border-indigo-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Historical Signals
+        </button>
+        <button
+          onClick={() => setActiveTab('dynamic')}
+          className={`px-6 py-3 font-semibold transition-all ${
+            activeTab === 'dynamic'
+              ? 'text-indigo-600 border-b-2 border-indigo-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Dynamic Backtester
+        </button>
+      </div>
+
+      {/* Historical Signals Tab */}
+      {activeTab === 'historical' && (
+        <div>
+          {/* Sub-tabs for Buy/Sell/All */}
+          <div className="flex space-x-2 mb-4 border-b border-gray-200">
+            <button
+              onClick={() => setHistoricalSubTab('buy')}
+              className={`px-4 py-2 font-medium transition-all ${
+                historicalSubTab === 'buy'
+                  ? 'text-green-600 border-b-2 border-green-600 bg-green-50'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Recent Buy Signals
+            </button>
+            <button
+              onClick={() => setHistoricalSubTab('sell')}
+              className={`px-4 py-2 font-medium transition-all ${
+                historicalSubTab === 'sell'
+                  ? 'text-red-600 border-b-2 border-red-600 bg-red-50'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Recent Sell Signals
+            </button>
+            <button
+              onClick={() => setHistoricalSubTab('all')}
+              className={`px-4 py-2 font-medium transition-all ${
+                historicalSubTab === 'all'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              All Signals
+            </button>
+          </div>
+
+          {/* Info Box */}
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="flex items-center mb-2">
+              <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="font-semibold text-blue-800">
+                {historicalSubTab === 'buy' && 'Recent Buy Signals (Last 14 Days)'}
+                {historicalSubTab === 'sell' && 'Recent Sell Signals (Last 14 Days)'}
+                {historicalSubTab === 'all' && 'All Signals (Last 14 Days)'}
+              </h3>
+            </div>
+            {/* <p className="text-sm text-blue-700">
+              {historicalSubTab === 'buy' && 'Shows all BUY signals generated with PO\'s fixed rules (RSI ≥ 60, Close > MA50, MACD > Signal, Volume ≥ 1.1× Prev)'}
+              {historicalSubTab === 'sell' && 'Shows positions that were sold due to stop-loss hits or manual exits'}
+              {historicalSubTab === 'all' && 'Shows complete signal history including BUY and REJECT with reasons'}
+            </p> */}
+          </div>
+
+          {/* Signals Count Badge */}
+          <div className="mb-4 flex items-center space-x-4">
+            <div className="px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+              <span className="text-sm font-semibold text-indigo-800">
+                {historicalSubTab === 'buy' && `${filteredSignals.length} Buy Signals Found`}
+                {historicalSubTab === 'sell' && `${filteredSignals.length} Sell Transactions`}
+                {historicalSubTab === 'all' && `${filteredSignals.length} Total Signals`}
+              </span>
+            </div>
+          </div>
+
+          {/* Signals Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-200">
+                  <th className="text-left p-3 font-semibold text-indigo-800">Date</th>
+                  <th className="text-left p-3 font-semibold text-indigo-800">Symbol</th>
+                  <th className="text-left p-3 font-semibold text-indigo-800">Price</th>
+                  <th className="text-left p-3 font-semibold text-indigo-800">RSI</th>
+                  <th className="text-left p-3 font-semibold text-indigo-800">MA50</th>
+                  <th className="text-left p-3 font-semibold text-indigo-800">MACD</th>
+                  <th className="text-left p-3 font-semibold text-indigo-800">Volume</th>
+                  {historicalSubTab === 'all' && (
+                    <th className="text-left p-3 font-semibold text-indigo-800">Signal</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSignals && filteredSignals.length > 0 ? (
+                  filteredSignals.map((signal, idx) => {
+                    const recommendation = signal.signal || signal.recommendation || 'N/A';
+                    const isBuy = recommendation === 'BUY';
+                    
+                    return (
+                      <tr key={idx} className={`border-b border-indigo-100 hover:bg-indigo-50/50 ${isBuy ? 'bg-green-50/30' : 'bg-red-50/30'}`}>
+                        <td className="p-3 text-indigo-700">{signal.date || 'N/A'}</td>
+                        <td className="p-3 font-bold text-indigo-800">{signal.symbol || 'N/A'}</td>
+                        <td className="p-3 font-mono text-indigo-700">₹{signal.price || signal.close || 0}</td>
+                        <td className="p-3">
+                          {signal.rsi ? (
+                            <span className={`text-xs font-medium ${signal.rsi_ok ? 'text-green-600' : 'text-red-600'}`}>
+                              {signal.rsi.toFixed(1)} {signal.rsi_ok ? '✓' : '✗'}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          {signal.ma50 ? (
+                            <span className={`text-xs font-medium ${signal.ma_ok ? 'text-green-600' : 'text-red-600'}`}>
+                              {signal.ma50.toFixed(0)} {signal.ma_ok ? '✓' : '✗'}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          {signal.macd ? (
+                            <span className={`text-xs font-medium ${signal.macd_ok ? 'text-green-600' : 'text-red-600'}`}>
+                              {signal.macd.toFixed(2)} {signal.macd_ok ? '✓' : '✗'}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          {signal.volume ? (
+                            <span className={`text-xs font-medium ${signal.volume_ok ? 'text-green-600' : 'text-red-600'}`}>
+                              {signal.volume.toLocaleString()} {signal.volume_ok ? '✓' : '✗'}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">-</span>
+                          )}
+                        </td>
+                        {historicalSubTab === 'all' && (
+                          <td className="p-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${isBuy ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {recommendation}
+                            </span>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={historicalSubTab === 'all' ? 8 : 7} className="p-8 text-center text-gray-500">
+                      {historicalSubTab === 'buy' && 'No buy signals in the last 14 days'}
+                      {historicalSubTab === 'sell' && 'No sell transactions in the last 14 days'}
+                      {historicalSubTab === 'all' && 'No signals available'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Backtester Tab */}
+      {activeTab === 'dynamic' && (
+        <div>
+          {/* Header Info */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="flex items-center mb-2">
+              <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="font-semibold text-blue-800">Backtesting Mode</h3>
+            </div>
+            <p className="text-sm text-blue-700">
+              Experiment with different thresholds to analyze signal changes.
+            </p>
+          </div>
+
+          {/* Threshold Settings - Compact Layout */}
+          <div className="mb-6 p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-xl">
+            <h3 className="font-bold text-purple-800 mb-6">Adjust Thresholds</h3>
+            
+            <div className="space-y-4">
+              {/* RSI Threshold - Inline */}
+              <div className="grid grid-cols-3 gap-4 items-center">
+                <div>
+                  <label className="block text-sm font-semibold text-purple-700">RSI Threshold</label>
+                  {/* <p className="text-xs text-purple-600">Rule: 60</p> */}
+                </div>
+                <div>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={thresholds.rsi_threshold || 60}
+                    onChange={(e) => setThresholds({...thresholds, rsi_threshold: parseFloat(e.target.value) || 60})}
+                    className="w-full border-2 border-purple-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="60"
+                  />
+                </div>
+                {/* <div>
+                  <p className="text-xs text-purple-600">
+                    Signal when RSI ≥ <span className="font-bold">{thresholds.rsi_threshold || 60}</span>
+                  </p>
+                </div> */}
+              </div>
+
+              {/* MA50 Buffer - Inline */}
+              <div className="grid grid-cols-3 gap-4 items-center">
+                <div>
+                  <label className="block text-sm font-semibold text-purple-700">MA50 Buffer (%)</label>
+                  {/* <p className="text-xs text-purple-600">Rule: 0%</p> */}
+                </div>
+                <div>
+                  <input
+                    type="number"
+                    min="0"
+                    max="20"
+                    step="0.5"
+                    value={thresholds.ma_buffer || 0}
+                    onChange={(e) => setThresholds({...thresholds, ma_buffer: parseFloat(e.target.value) || 0})}
+                    className="w-full border-2 border-purple-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="0"
+                  />
+                </div>
+                {/* <div>
+                  <p className="text-xs text-purple-600">
+                    Close &gt; MA50 × <span className="font-bold">{(1 + (thresholds.ma_buffer || 0) / 100).toFixed(2)}</span>
+                  </p>
+                </div> */}
+              </div>
+
+              {/* Volume Multiplier - Inline */}
+              <div className="grid grid-cols-3 gap-4 items-center">
+                <div>
+                  <label className="block text-sm font-semibold text-purple-700">Volume Multiplier</label>
+                  {/* <p className="text-xs text-purple-600">Rule: 1.1×</p> */}
+                </div>
+                <div>
+                  <input
+                    type="number"
+                    min="1.0"
+                    max="3.0"
+                    step="0.1"
+                    value={thresholds.volume_multiplier || 1.1}
+                    onChange={(e) => setThresholds({...thresholds, volume_multiplier: parseFloat(e.target.value) || 1.1})}
+                    className="w-full border-2 border-purple-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="1.1"
+                  />
+                </div>
+                {/* <div>
+                  <p className="text-xs text-purple-600">
+                    Volume ≥ Prev × <span className="font-bold">{thresholds.volume_multiplier || 1.1}</span>
+                  </p>
+                </div> */}
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-purple-300 my-4"></div>
+
+              {/* Enable/Disable Section */}
+              <div>
+                <h4 className="text-sm font-semibold text-purple-800 mb-3">
+                  Select Indicators to Check
+                  <span className="ml-2 text-xs font-normal text-purple-600">(Uncheck to test without that indicator)</span>
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex items-center p-3 bg-white/60 rounded-lg cursor-pointer hover:bg-white transition-colors border border-purple-200">
+                    <input
+                      type="checkbox"
+                      checked={thresholds.enable_rsi !== false}
+                      onChange={(e) => setThresholds({...thresholds, enable_rsi: e.target.checked})}
+                      className="mr-3 w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                    />
+                    <span className="text-sm font-medium text-purple-700">RSI</span>
+                  </label>
+
+                  <label className="flex items-center p-3 bg-white/60 rounded-lg cursor-pointer hover:bg-white transition-colors border border-purple-200">
+                    <input
+                      type="checkbox"
+                      checked={thresholds.enable_ma !== false}
+                      onChange={(e) => setThresholds({...thresholds, enable_ma: e.target.checked})}
+                      className="mr-3 w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                    />
+                    <span className="text-sm font-medium text-purple-700">MA</span>
+                  </label>
+
+                  <label className="flex items-center p-3 bg-white/60 rounded-lg cursor-pointer hover:bg-white transition-colors border border-purple-200">
+                    <input
+                      type="checkbox"
+                      checked={thresholds.enable_macd !== false}
+                      onChange={(e) => setThresholds({...thresholds, enable_macd: e.target.checked})}
+                      className="mr-3 w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                    />
+                    <span className="text-sm font-medium text-purple-700">MACD</span>
+                  </label>
+
+                  <label className="flex items-center p-3 bg-white/60 rounded-lg cursor-pointer hover:bg-white transition-colors border border-purple-200">
+                    <input
+                      type="checkbox"
+                      checked={thresholds.enable_volume !== false}
+                      onChange={(e) => setThresholds({...thresholds, enable_volume: e.target.checked})}
+                      className="mr-3 w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                    />
+                    <span className="text-sm font-medium text-purple-700">Volume</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Reset and Calculate Buttons */}
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <button
+                  onClick={() => setThresholds({
+                    rsi_threshold: 60,
+                    ma_buffer: 0,
+                    volume_multiplier: 1.1,
+                    enable_rsi: true,
+                    enable_ma: true,
+                    enable_macd: true,
+                    enable_volume: true
+                  })}
+                  className="py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors text-sm"
+                >
+                  🔄 Reset to Origial Rule
+                </button>
+
+                <button
+                  onClick={handleRecalculate}
+                  disabled={loading}
+                  className={`py-2 rounded-lg font-semibold transition-all text-sm ${
+                    loading
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 shadow-md'
+                  }`}
+                >
+                  {loading ? 'Calculating...' : 'Recalculate'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Comparison Results */}
+          {comparisonData && (
+            <div>
+              {/* Summary Box */}
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+                <h3 className="font-bold text-green-800 mb-3">Comparison Summary</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-sm text-green-700 mb-1">Original</div>
+                    <div className="text-2xl font-bold text-green-800">
+                      {comparisonData.original_summary.buy_count} BUY
+                    </div>
+                    <p className="text-xs text-green-600 mt-1">
+                      RSI≥60, Close&gt;MA50, MACD&gt;Signal, Vol≥1.1×
+                    </p>
+                  </div>
+                  <div>
+                    <div className="text-sm text-green-700 mb-1">Your Custom Settings</div>
+                    <div className="text-2xl font-bold text-green-800">
+                      {comparisonData.new_summary.buy_count} BUY
+                      {comparisonData.changes.new_buys > 0 && (
+                        <span className="text-sm ml-2 bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                          +{comparisonData.changes.new_buys} new
+                        </span>
+                      )}
+                      {comparisonData.changes.lost_buys > 0 && (
+                        <span className="text-sm ml-2 bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                          -{comparisonData.changes.lost_buys} lost
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-green-600 mt-1">
+                      RSI≥{thresholds.rsi_threshold}, MA50+{thresholds.ma_buffer}%, Vol≥{thresholds.volume_multiplier}×
+                    </p>
+                  </div>
+                </div>
+
+                {/* Insights */}
+                {comparisonData.changes.total_changed > 0 && (
+                  <div className="mt-3 pt-3 border-t border-green-300">
+                    <p className="text-sm text-green-800">
+                      <span className="font-semibold">Impact:</span> {comparisonData.changes.total_changed} stocks changed signal
+                      ({comparisonData.changes.new_buys} became BUY, {comparisonData.changes.lost_buys} became REJECT)
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Comparison Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200">
+                      <th className="text-left p-3 font-semibold text-purple-800">Symbol</th>
+                      <th className="text-left p-3 font-semibold text-purple-800">Price</th>
+                      <th className="text-left p-3 font-semibold text-purple-800">RSI</th>
+                      <th className="text-left p-3 font-semibold text-purple-800">MA50</th>
+                      <th className="text-left p-3 font-semibold text-purple-800">Original</th>
+                      <th className="text-left p-3 font-semibold text-purple-800">New</th>
+                      <th className="text-left p-3 font-semibold text-purple-800">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {comparisonData.comparison_data.map((row, idx) => (
+                      <tr 
+                        key={idx} 
+                        className={`border-b border-purple-100 hover:bg-purple-50/50 ${row.changed ? 'bg-yellow-50/50' : ''}`}
+                      >
+                        <td className="p-3 font-bold text-purple-800">{row.symbol}</td>
+                        <td className="p-3 font-mono text-purple-700">₹{row.price}</td>
+                        <td className="p-3 text-xs font-mono text-purple-700">
+                          {row.rsi ? row.rsi.toFixed(1) : '-'}
+                        </td>
+                        <td className="p-3 text-xs font-mono text-purple-700">
+                          {row.ma50 ? row.ma50.toFixed(0) : '-'}
+                        </td>
+                        <td className="p-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            row.original.recommendation === 'BUY'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {row.original.recommendation}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            row.new.recommendation === 'BUY'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {row.new.recommendation}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          {row.changed ? (
+                            <span className={`text-xs font-bold ${
+                              row.new.recommendation === 'BUY' ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {row.new.recommendation === 'BUY' ? 'NEW' : 'LOST'}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400"></span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 // Section Card Component
 const SectionCard = ({ number, title, children, gradient = "from-gray-500 to-gray-600", bgColor = "bg-white" }) => (
   <div className={`${bgColor} rounded-2xl shadow-lg border border-gray-200/50 p-6 hover:shadow-xl transition-all duration-300 h-full`}>
@@ -1592,6 +2143,18 @@ function TradingDashboard() {
   const [transactions, setTransactions] = useState([]);
   const [cumulativeProfitLoss, setCumulativeProfitLoss] = useState(0);
   const [oddLots, setOddLots] = useState([]);
+  // Component 7: Signal Analysis & Backtesting states
+  const [showSignalAnalysis, setShowSignalAnalysis] = useState(false);
+  const [historicalSignals, setHistoricalSignals] = useState([]);
+  const [activeAnalysisTab, setActiveAnalysisTab] = useState('historical'); // 'historical' or 'dynamic'
+  const [thresholds, setThresholds] = useState({
+    rsiThreshold: 60,
+    ma50Buffer: 5.0,
+    enableMacd: true,
+    enableVolume: true
+  });
+  const [comparisonData, setComparisonData] = useState(null);
+  const [backtestLoading, setBacktestLoading] = useState(false);
 
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -1801,7 +2364,7 @@ function TradingDashboard() {
     return Object.values(consolidated);
   };
 
-  // ⭐ UPDATED: calculatePortfolioValue with Realized and Unrealized Profit
+  // UPDATED: calculatePortfolioValue with Realized and Unrealized Profit
   const calculatePortfolioValue = () => {
     // 1. Calculate Risk Value (money invested at ORIGINAL buy prices)
     const riskValue = risk.reduce((sum, pos) => {
@@ -1826,7 +2389,15 @@ function TradingDashboard() {
     
     const totalProfitLoss = realizedProfit + unrealizedProfit;
     
-    return (cashBalance || 0) + riskValue + totalProfitLoss;
+    return {
+      totalValue: (cashBalance || 0) + riskValue + totalProfitLoss,
+      riskValue: riskValue,                      // ₹56,100 (cost)
+      riskCurrentValue: riskValue + unrealizedProfit, // ₹53,340 (current)
+      oddLotValue: oddLotValue,
+      realizedProfit: realizedProfit,
+      unrealizedProfit: unrealizedProfit,
+      totalProfitLoss: totalProfitLoss
+};
   };
 
   const checkRiskPositions = (positions) => {
@@ -2612,9 +3183,11 @@ function TradingDashboard() {
                 gradient="from-blue-600 to-cyan-600"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* 1. Available Cash - NO CHANGE */}
+                  {/* 1. Available Cash */}
                   <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-sm">
-                    <div className="text-2xl font-bold text-green-700 mb-1">₹{(cashBalance || 0).toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-green-700 mb-1">
+                      ₹{(cashBalance || 0).toLocaleString()}
+                    </div>
                     <div className="text-sm font-medium text-green-600">Available Cash</div>
                     <div className="w-full bg-green-100 rounded-full h-2 mt-2">
                       <div
@@ -2624,35 +3197,45 @@ function TradingDashboard() {
                     </div>
                   </div>
 
-                  {/* 2. Risk Amount - NO CHANGE */}
+                  {/* 2. Risk Amount - UPDATED */}
                   <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl shadow-sm">
-                    <div className="text-2xl font-bold text-blue-700 mb-1">₹{((parseInt(riskSettings?.portfolioSize || 1000000) - (cashBalance || 0)) || 0).toLocaleString()}</div>
-                    <div className="text-sm font-medium text-blue-600">Risk Amount</div>
-                    <div className="w-full bg-blue-100 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
-                        style={{width: `${(((parseInt(riskSettings?.portfolioSize || 1000000) - (cashBalance || 0)) / parseInt(riskSettings?.portfolioSize || 1000000)) * 100) || 0}%`}}
-                      ></div>
-                    </div>
+                    {(() => {
+                      const portfolio = calculatePortfolioValue();
+                      return (
+                        <>
+                          <div className="text-2xl font-bold text-blue-700 mb-1">
+                            ₹{portfolio.riskCurrentValue.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          </div>
+                          <div className="text-sm font-medium text-blue-600">Risk Amount</div>
+                          <div className="text-xs text-blue-500 mt-1">
+                            Invested: ₹{portfolio.riskValue.toLocaleString()} | 
+                            {portfolio.unrealizedProfit >= 0 ? ' +' : ' '}
+                            ₹{Math.abs(portfolio.unrealizedProfit).toLocaleString()}
+                          </div>
+                          <div className="w-full bg-blue-100 rounded-full h-2 mt-2">
+                            <div
+                              className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
+                              style={{width: `${((portfolio.riskValue / parseInt(riskSettings?.portfolioSize || 1000000)) * 100) || 0}%`}}
+                            ></div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
 
-                  {/* 3. SWAPPED: Odd Lot Balance (now 3rd position) */}
+                  {/* 3. Odd Lot Balance */}
                   <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl shadow-sm">
                     {(() => {
-                      const totalAmount = oddLots.reduce((sum, lot) => {
-                        const netAmount = (lot.quantity * lot.price) - (lot.charges || 0);
-                        return sum + netAmount;
-                      }, 0);
-                      
+                      const portfolio = calculatePortfolioValue();
                       return (
                         <>
                           <div className="text-2xl font-bold text-yellow-800 mb-2">
-                            ₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            ₹{portfolio.oddLotValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                           <div className="text-sm font-medium text-yellow-600 mb-3">Odd Lot Balance</div>
                           
                           {oddLots && oddLots.length > 0 ? (
-                            <div className="space-y-2 pt-3 border-t border-yellow-300 max-h-32 overflow-y-auto">
+                            <div className="space-y-2 pt-3 border-t border-yellow-300 mt-2 max-h-32 overflow-y-auto">
                               {oddLots.map((lot, idx) => (
                                 <div key={idx} className="flex justify-between items-center bg-white/60 rounded-lg p-2 text-xs">
                                   <span className="font-semibold text-yellow-800">{lot.symbol}</span>
@@ -2670,53 +3253,52 @@ function TradingDashboard() {
                     })()}
                   </div>
 
-                  {/* 4. Total Portfolio Value - NO CHANGE in position */}
+                  {/* 4. Total Portfolio Value - UPDATED */}
                   <div className="text-center p-4 bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-sm">
-                    <div className="text-2xl font-bold text-cyan-700 mb-1">
-                      ₹{calculatePortfolioValue().toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-sm font-medium text-cyan-600">Total Portfolio Value</div>
-                    <div className="text-xs text-cyan-500 mt-1">
-                      Cash + Risk + Odd Lots + Realized P&L + Unrealized P&L
-                    </div>
+                    {(() => {
+                      const portfolio = calculatePortfolioValue();
+                      return (
+                        <>
+                          <div className="text-2xl font-bold text-cyan-700 mb-1">
+                            ₹{portfolio.totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                          <div className="text-sm font-medium text-cyan-600">Total Portfolio Value</div>
+                          <div className="text-xs text-cyan-500 mt-1">
+                            Cash + Positions + Odd Lots + P&L
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
 
-                {/* SWAPPED: Cumulative P&L (now BELOW the grid with subcomponents) */}
+                {/* Cumulative P&L Section - UPDATED */}
                 <div className="mt-4 p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-xl shadow-sm">
                   {(() => {
-                    // Calculate realized and unrealized profit
-                    const realizedProfit = transactions.reduce((sum, tx) => sum + (tx.profit || 0), 0);
-                    const unrealizedProfit = risk.reduce((sum, position) => {
-                      const currentValue = position.clPrice * position.quantity;
-                      const costBasis = position.avBuyPrice * position.quantity;
-                      return sum + (currentValue - costBasis);
-                    }, 0);
-                    const totalPL = realizedProfit + unrealizedProfit;
+                    const portfolio = calculatePortfolioValue();
                     
                     return (
                       <>
                         <div className="text-center mb-4">
-                          <div className={`text-3xl font-bold mb-2 ${totalPL >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                            ₹{totalPL.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <div className={`text-3xl font-bold mb-2 ${portfolio.totalProfitLoss >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                            {portfolio.totalProfitLoss >= 0 ? '+' : ''}₹{portfolio.totalProfitLoss.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                           <div className="text-sm font-bold text-purple-600">Cumulative P&L</div>
                         </div>
                         
-                        {/* NEW SUBCOMPONENTS */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="p-4 bg-white/80 rounded-lg border border-purple-200">
                             <div className="text-xs font-medium text-purple-700 mb-2">Realized Profit</div>
-                            <div className={`text-2xl font-bold ${realizedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {realizedProfit >= 0 ? '+' : ''}₹{realizedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            <div className={`text-2xl font-bold ${portfolio.realizedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {portfolio.realizedProfit >= 0 ? '+' : ''}₹{portfolio.realizedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                             <div className="text-xs text-purple-500 mt-1">From {transactions.length} completed trades</div>
                           </div>
                           
                           <div className="p-4 bg-white/80 rounded-lg border border-purple-200">
                             <div className="text-xs font-medium text-purple-700 mb-2">Unrealized Profit</div>
-                            <div className={`text-2xl font-bold ${unrealizedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {unrealizedProfit >= 0 ? '+' : ''}₹{unrealizedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            <div className={`text-2xl font-bold ${portfolio.unrealizedProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {portfolio.unrealizedProfit >= 0 ? '+' : ''}₹{portfolio.unrealizedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                             <div className="text-xs text-purple-500 mt-1">From {risk.length} open positions</div>
                           </div>
@@ -2732,6 +3314,14 @@ function TradingDashboard() {
               <Biller
                 billerPositions={billerPositions}
                 onSellFromBiller={handleSellFromBiller}
+              />
+            </div>
+
+            {/* ADD THIS: Component 7 */}
+            <div className="grid grid-cols-1 gap-6">
+              <SignalAnalysis 
+                token={token}
+                signals={signals}
               />
             </div>
           </div>
