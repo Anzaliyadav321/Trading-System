@@ -9,7 +9,7 @@ const AuthContext = React.createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true); // ⬅️ CHANGE 1: Change from false to true
+  const [loading, setLoading] = useState(true); // CHANGE 1: Change from false to true
 
   // ⬅️ CHANGE 2: Add this NEW useEffect to load token from localStorage on mount
   useEffect(() => {
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('token', token); // ⬅️ CHANGE 3: Add this line to save token
+      localStorage.setItem('token', token); // CHANGE 3: Add this line to save token
       
       fetch(`${API_BASE_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('token'); // ⬅️ CHANGE 6: Add this line
+    localStorage.removeItem('token'); 
   };
 
   return (
@@ -2168,15 +2168,21 @@ function TradingDashboard() {
 
   const [showAddIndustry, setShowAddIndustry] = useState(false);
   const [newIndustry, setNewIndustry] = useState({ sector: '', rank: 1, weightage: 0, enabled: true });
+  // ADD THESE NEW STATES FOR SECTOR FEATURE
+  const [sectors, setSectors] = useState([]); 
+  const [loadingSectors, setLoadingSectors] = useState(false);
+  const [showSectorModal, setShowSectorModal] = useState(false);
+  const [selectedSectorData, setSelectedSectorData] = useState(null);
+  const [loadingSymbols, setLoadingSymbols] = useState(false);
 
   const technicalIndicators = ["RSI", "MA", "MACD", "Volume"];
 
   const [industryPreferences, setIndustryPreferences] = useState([
-    { sector: "Banking", rank: 1, weightage: 25, enabled: true },
-    { sector: "Hydropower", rank: 2, weightage: 20, enabled: true },
-    { sector: "Insurance", rank: 3, weightage: 15, enabled: true },
-    { sector: "Hotels & Tourism", rank: 4, weightage: 12, enabled: false },
-    { sector: "Manufacturing", rank: 5, weightage: 10, enabled: true },
+    { sector: "Commercial Banks", rank: 1, weightage: 25, enabled: true },
+    { sector: "Hydro Power", rank: 2, weightage: 20, enabled: true },
+    { sector: "Life Insurance", rank: 3, weightage: 15, enabled: true },
+    { sector: "Hotels And Tourism", rank: 4, weightage: 12, enabled: false },
+    { sector: "Manufacturing And Processing", rank: 5, weightage: 10, enabled: true },
     { sector: "Microfinance", rank: 6, weightage: 8, enabled: false },
     { sector: "Others", rank: 7, weightage: 10, enabled: true }
   ]);
@@ -2507,6 +2513,30 @@ function TradingDashboard() {
   setExecutorLogs(initialLogs);
 }, [token, riskSettings.portfolioSize]); 
 
+ 
+
+// ADD sector NEW useEffect HERE:
+useEffect(() => {
+  const fetchSectors = async () => {
+    try {
+      setLoadingSectors(true);
+      const response = await fetch(`${API_BASE_URL}/sectors/list`);
+      if (response.ok) {
+        const data = await response.json();
+        setSectors(data);
+      }
+    } catch (error) {
+      console.error('Failed to load sectors:', error);
+      setSectors([]);
+    } finally {
+      setLoadingSectors(false);
+    }
+  };
+
+  fetchSectors();
+}, []);
+
+
    // Refresh signals when preferences change
   useEffect(() => {
     if (!token) {
@@ -2655,6 +2685,32 @@ function TradingDashboard() {
     setSalesInTransit(prev => [...prev, saleOrder]);
   };
 
+
+  // ADD sector NEW FUNCTION HERE:
+  const handleSectorClick = async (sectorName) => {
+    try {
+      setLoadingSymbols(true);
+      setShowSectorModal(true);
+      
+      const response = await fetch(
+        `${API_BASE_URL}/sectors/symbols?sector=${encodeURIComponent(sectorName)}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch sector symbols');
+      }
+      
+      const data = await response.json();
+      setSelectedSectorData(data);
+    } catch (error) {
+      console.error('Error fetching sector symbols:', error);
+      alert('Failed to load sector details');
+      setShowSectorModal(false);
+    } finally {
+      setLoadingSymbols(false);
+    }
+  };
+
   const updateIndustryPreference = (index, field, value) => {
     setIndustryPreferences(prev =>
       prev.map((item, i) =>
@@ -2801,7 +2857,12 @@ function TradingDashboard() {
                                 onChange={(e) => updateIndustryPreference(index, 'enabled', e.target.checked)}
                                 className="mr-2 w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
                               />
-                              <span className="font-semibold text-sm text-gray-800">{industry.sector}</span>
+                              <span 
+                                className="font-semibold text-sm text-gray-800 cursor-pointer hover:text-blue-600 hover:underline"
+                                onClick={() => handleSectorClick(industry.sector)}
+                              >
+                                {industry.sector}
+                              </span>                              
                             </div>
                             <div className="flex items-center space-x-2">
                               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">#{industry.rank}</span>
@@ -3357,13 +3418,21 @@ function TradingDashboard() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Industry Name</label>
-                <input
-                  type="text"
+                <select
                   value={newIndustry.sector}
                   onChange={(e) => setNewIndustry({...newIndustry, sector: e.target.value})}
                   className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Technology"
-                />
+                  disabled={loadingSectors}
+                >
+                  <option value="">
+                    {loadingSectors ? 'Loading sectors...' : 'Select Industry'}
+                  </option>
+                  {sectors.map((sector) => (
+                    <option key={sector} value={sector}>
+                      {sector}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Initial Weightage (%)</label>
@@ -3404,6 +3473,89 @@ function TradingDashboard() {
           </div>
         </div>
       )}
+
+      {/* ADD THIS: Sector Symbols Modal */}
+      {showSectorModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-2xl font-bold">
+                    {loadingSymbols ? 'Loading...' : selectedSectorData?.sector || 'Sector Details'}
+                  </h3>
+                  {selectedSectorData && (
+                    <p className="text-indigo-100 text-sm mt-1">
+                      {selectedSectorData.count} symbols • {selectedSectorData.description}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    setShowSectorModal(false);
+                    setSelectedSectorData(null);
+                  }}
+                  className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {loadingSymbols ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                </div>
+              ) : selectedSectorData ? (
+                <>
+                  {/* Symbols Grid */}
+                  <div className="grid grid-cols-4 gap-3">
+                    {selectedSectorData.symbols.map((symbol) => (
+                      <div
+                        key={symbol}
+                        className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-3 text-center hover:shadow-md transition-shadow"
+                      >
+                        <span className="font-bold text-indigo-800">{symbol}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Summary */}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-600 text-center">
+                      Total: <span className="font-bold text-gray-800">{selectedSectorData.count} symbols</span>
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  No data available
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowSectorModal(false);
+                  setSelectedSectorData(null);
+                }}
+                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
 
       <style jsx>{`
         @keyframes scroll {

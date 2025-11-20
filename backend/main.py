@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date
 from jose import jwt, JWTError
 from pathlib import Path
 from dotenv import load_dotenv
+from backend.core.api.sectors import router as sectors_router
 import bcrypt
 import random
 import os
@@ -38,6 +39,9 @@ from backend.core.auth.email_service import send_verification_email
 
 # App initialization
 app = FastAPI(title="Trading System with JWT + OTP + DB Orders", version="1.0.0")
+
+app.include_router(sectors_router)
+
 
 def run_merolagani_pipeline():
     """
