@@ -22,7 +22,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
 # File paths for signals
 BACKEND_DIR = Path(__file__).resolve().parent
-MASTER_PATH = BACKEND_DIR / "core" / "data" / "Master_data.csv"
+MASTER_PATH = BACKEND_DIR / "core" / "data" / "master_data.csv"
 ALL_SIGNALS_PATH = BACKEND_DIR / "core" / "data" / "all_signals.csv"
 
 # Local imports
@@ -329,7 +329,7 @@ async def get_today_signals_endpoint(current_user: User = Depends(get_current_us
                 "symbol": signal.get("symbol", "N/A"),
                 "price": float(signal.get("close", 0)),
                 "change": round(change_pct, 2),
-                "signal": signal.get("Recommendation", "HOLD"),
+                "recommendation": signal.get("Recommendation", "REJECT"),  # ✅ CHANGED: from "signal" to "recommendation", from "HOLD" to "REJECT"
                 "quantity": calculate_recommended_quantity(signal),
                 "rsi": round(float(signal.get("RSI", 0)), 2) if signal.get("RSI") and pd.notna(signal.get("RSI")) else None,
                 "ma50": round(float(signal.get("MA50", 0)), 2) if signal.get("MA50") and pd.notna(signal.get("MA50")) else None,
@@ -354,7 +354,7 @@ async def get_today_signals_endpoint(current_user: User = Depends(get_current_us
             "signals": formatted_signals,
             "timestamp": _cache_timestamp.isoformat(),
             "count": len(formatted_signals),
-            "buy_count": len([s for s in formatted_signals if s["signal"] == "BUY"]),
+            "buy_count": len([s for s in formatted_signals if s["recommendation"] == "BUY"]),  # ✅ CHANGED: from "signal" to "recommendation"
             "cached": False
         }
     except Exception as e:
@@ -401,7 +401,7 @@ async def refresh_signals(current_user: User = Depends(get_current_user)):
                 "symbol": row.get("symbol", "N/A"),
                 "price": float(row.get("close", 0)),
                 "change": round(change_pct, 2),
-                "signal": row.get("Recommendation", "HOLD"),
+                "recommendation": row.get("Recommendation", "REJECT"),  # ✅ CHANGED: from "signal" to "recommendation", from "HOLD" to "REJECT"
                 "quantity": calculate_recommended_quantity(row),
                 "rsi": round(float(row.get("RSI", 0)), 2) if pd.notna(row.get("RSI")) else None,
                 "ma50": round(float(row.get("MA50", 0)), 2) if pd.notna(row.get("MA50")) else None,
@@ -438,6 +438,82 @@ async def refresh_signals(current_user: User = Depends(get_current_user)):
         raise HTTPException(
             status_code=500,
             detail=f"Failed to refresh signals: {str(e)}"
+        )
+
+# ✅ NEW ENDPOINT: Get historical signals for Signal Analysis component
+@app.get("/signals/historical")
+async def get_historical_signals(
+    days: int = 14,
+    current_user: User = Depends(get_current_user)
+):
+    """Get historical signals for last N days (for Signal Analysis component)"""
+    try:
+        from backend.core.pipeline.nepse_pipeline import get_last_n_days_signals
+        
+        # Get last N days of signals
+        historical_df = get_last_n_days_signals(days=days)
+        
+        if len(historical_df) == 0:
+            return {
+                "success": True,
+                "signals": [],
+                "count": 0,
+                "days": days,
+                "message": "No historical data available"
+            }
+        
+        # Transform to frontend format
+        formatted_signals = []
+        for _, signal in historical_df.iterrows():
+            # Calculate change percentage
+            change_pct = 0
+            if "change_percent" in signal and pd.notna(signal["change_percent"]):
+                change_pct = float(signal["change_percent"])
+            elif pd.notna(signal.get("close")) and pd.notna(signal.get("open")) and signal.get("open") != 0:
+                change_pct = ((float(signal["close"]) - float(signal["open"])) / float(signal["open"])) * 100
+            
+            # Get previous day volume
+            prev_vol = signal.get("Prev_Volume")
+            previous_day_volume = int(prev_vol) if pd.notna(prev_vol) else None
+            
+            formatted_signals.append({
+                "symbol": signal.get("symbol", "N/A"),
+                "price": float(signal.get("close", 0)),
+                "change": round(change_pct, 2),
+                "recommendation": signal.get("Recommendation", "REJECT"),  # ✅ Use "recommendation"
+                "quantity": calculate_recommended_quantity(signal),
+                "rsi": round(float(signal.get("RSI", 0)), 2) if pd.notna(signal.get("RSI")) else None,
+                "ma50": round(float(signal.get("MA50", 0)), 2) if pd.notna(signal.get("MA50")) else None,
+                "macd": round(float(signal.get("MACD", 0)), 4) if pd.notna(signal.get("MACD")) else None,
+                "macd_signal": round(float(signal.get("MACD_Signal", 0)), 4) if pd.notna(signal.get("MACD_Signal")) else None,
+                "volume": int(signal.get("volume", 0)) if pd.notna(signal.get("volume")) else None,
+                "prev_volume": previous_day_volume,
+                "previousDayVolume": previous_day_volume,
+                "date": str(signal.get("date").date()) if hasattr(signal.get("date"), 'date') else str(signal.get("date")),
+                "rsi_ok": bool(signal.get("RSI_OK", False)),
+                "ma_ok": bool(signal.get("MA_OK", False)),
+                "macd_ok": bool(signal.get("MACD_OK", False)),
+                "volume_ok": bool(signal.get("VOLUME_OK", False))
+            })
+        
+        return {
+            "success": True,
+            "signals": formatted_signals,
+            "count": len(formatted_signals),
+            "days": days,
+            "date_range": {
+                "start": str(historical_df['date'].min().date()),
+                "end": str(historical_df['date'].max().date())
+            }
+        }
+        
+    except Exception as e:
+        print(f"Error fetching historical signals: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch historical signals: {str(e)}"
         )
 
 @app.post("/signals/recalculate")

@@ -2213,7 +2213,7 @@ function TradingDashboard() {
     const processedSignals = (data.signals || []).map(signal => ({
       symbol: signal.symbol || '',
       close: signal.price || signal.close || 0,
-      recommendation: signal.signal || 'REJECT',
+      recommendation: signal.recommendation || 'REJECT',  // ✅ FIXED: use 'recommendation' not 'signal'
       quantity: signal.quantity || 100,
       industry: signal.industry || 'N/A',
       industryRank: signal.industryRank || '#N/A',

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """
 Sector Scraper for Merolagani
 ==============================
@@ -116,7 +116,7 @@ def scrape_sector_for_symbol(symbol):
                         potential_sector = lines[j].replace('Sector:', '').strip()
                         if potential_sector and len(potential_sector) > 2:
                             sector = normalize_sector_name(potential_sector)
-                            print(f"✓ {sector}")
+                            print(f"{sector}")
                             return sector
         
         print("⚠ Not found, marking as 'Others'")
