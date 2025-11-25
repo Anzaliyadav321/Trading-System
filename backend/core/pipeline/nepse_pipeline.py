@@ -1,3 +1,4 @@
+
 # backend/core/pipeline/nepse_pipeline.py
 
 import pandas as pd
@@ -34,7 +35,7 @@ def update_master_with_daily():
             'volume', 'change_percent', 'source', 'timestamp'
         ])
         empty_daily.to_csv(DAILY_PATH, index=False)
-        print(f"[INFO] ✅ Empty daily file created at {DAILY_PATH}")
+        print(f"[INFO] Empty daily file created at {DAILY_PATH}")
         
         # Return master as-is (no new data to merge)
         print("[INFO] No new data to merge - using existing master data")
@@ -67,7 +68,7 @@ def update_master_with_daily():
 
     # Save updated master
     combined.to_csv(MASTER_PATH, index=False)
-    print(f"[INFO] ✅ Updated master data saved to {MASTER_PATH}")
+    print(f"[INFO] Updated master data saved to {MASTER_PATH}")
 
     return combined
 
@@ -131,7 +132,7 @@ def run_pipeline(
     
     print(f"[INFO] Active checks: {', '.join(active_indicators) if active_indicators else 'NONE'}")
     
-    # ✅ FIXED: Generate signals on FULL dataset (all history)
+    # FIXED: Generate signals on FULL dataset (all history)
     final_df = generate_buy_signals(
         df,  # ← Use full history, not just today!
         enable_rsi=enable_rsi,
@@ -143,7 +144,7 @@ def run_pipeline(
     # Step 3: Save ALL signals (full history)
     final_df = final_df.sort_values(by=["date", "symbol"]).reset_index(drop=True)
     final_df.to_csv(ALL_SIGNALS_PATH, index=False)
-    print(f"\n[INFO] ✅ Saved all signals (full history) to: {ALL_SIGNALS_PATH}")
+    print(f"\n[INFO] Saved all signals (full history) to: {ALL_SIGNALS_PATH}")
 
     # Step 4: Get today's data for reporting
     final_df['date'] = pd.to_datetime(final_df['date'])

@@ -1,7 +1,8 @@
 # backend/core/auth/models.py
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, Date, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import relationship
+from sqlalchemy import Text
 from datetime import datetime
 import enum
 from backend.core.database import Base
@@ -31,7 +32,9 @@ class PositionStatus(str, enum.Enum):
     CLOSED = "CLOSED"
 
 
-
+# ============================================
+# USER MODEL
+# ============================================
 
 class User(Base):
     __tablename__ = "users"
@@ -45,8 +48,13 @@ class User(Base):
 
     # Relationships
     orders = relationship("Order", back_populates="user")
-    portfolio = relationship("UserPortfolio", back_populates="user", uselist=False)  # NEW
+    portfolio = relationship("UserPortfolio", back_populates="user", uselist=False)
+    transactions = relationship("Transaction", back_populates="user")  # ADDED THIS LINE
 
+
+# ============================================
+# ORDER MODEL
+# ============================================
 
 class Order(Base):
     __tablename__ = "orders"
@@ -65,6 +73,10 @@ class Order(Base):
     # Relationship
     user = relationship("User", back_populates="orders")
 
+
+# ============================================
+# LEGACY STOP LOSS MODEL
+# ============================================
 
 class StopLossPosition(Base):
     """Legacy stop loss tracking - kept for backward compatibility"""
@@ -194,3 +206,150 @@ class DailyEntry(Base):
 
     def __repr__(self):
         return f"<DailyEntry(day={self.day_number}, price={self.entry_price}, qty={self.quantity})>"
+
+
+# ============================================
+# TRANSACTION MODELS (WITH BILL DETAILS)
+# ============================================
+
+# backend/core/auth/models.py - Update Transaction class
+
+class Transaction(Base):
+    """
+    Transaction model with complete bill details for BUY and SELL
+    """
+    __tablename__ = "transactions"
+    
+    # Primary Key
+    id = Column(Integer, primary_key=True, index=True)
+    
+    # Foreign Key
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    # Core Transaction Fields
+    symbol = Column(String(20), nullable=False, index=True)
+    transaction_type = Column(String(10), nullable=False)  # 'BUY' or 'SELL'
+    quantity = Column(Integer, nullable=False)
+    price = Column(Float, nullable=False)
+    total_amount = Column(Float, nullable=False)
+    stop_loss_price = Column(Float, nullable=True)
+    notes = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # ============================================
+    # BUY TRANSACTION FIELDS
+    # ============================================
+    
+    # Buy Bill Information
+    bill_number = Column(String(50), nullable=True, index=True)
+    bill_date = Column(Date, nullable=True)
+    
+    # Financial Breakdown (Buy)
+    sub_total = Column(Float, default=0.0)
+    grand_total = Column(Float, default=0.0)
+    share_amount = Column(Float, default=0.0)
+    share_quantity = Column(Integer, default=0)
+    
+    # Commission Details (Buy)
+    sebn_commission = Column(Float, default=0.0)
+    nepse_commission = Column(Float, default=0.0)
+    sebon_regulatory_fee = Column(Float, default=0.0)
+    broker_commission = Column(Float, default=0.0)
+    name_transfer_amount = Column(Float, default=0.0)
+    dp_amount = Column(Float, default=0.0)
+    total_commission = Column(Float, default=0.0)
+    
+    # Clearance and Settlement (Buy)
+    clearance_date = Column(Date, nullable=True)
+    net_receivable_amount = Column(Float, default=0.0)
+    
+    # ============================================
+    # SELL TRANSACTION FIELDS (NEW)
+    # ============================================
+    
+    # Sell Bill Information
+    sell_bill_number = Column(String(50), nullable=True, index=True)
+    sell_bill_date = Column(Date, nullable=True)
+    
+    # Base Price (Original purchase price for CGT calculation)
+    base_price = Column(Float, default=0.0)
+    
+    # Capital Gain Tax (7.5% of profit, calculated annually)
+    cgt = Column(Float, default=0.0)
+    capital_gain = Column(Float, default=0.0)  # Profit amount
+    
+    # SEBO Commission (Sell specific)
+    sebo_commission = Column(Float, default=0.0)
+    
+    # Effective Rate
+    eff_rate = Column(Float, default=0.0)
+    
+    # Payout Status
+    payout = Column(String(10), default='No')  # 'Yes' or 'No'
+    
+    # Capital Office (CO) Details
+    co_qty = Column(Float, default=0.0)  # CO Quantity
+    co_amt = Column(Float, default=0.0)  # CO Amount
+    
+    # Net Payable Less Closeout
+    net_payable_less_closeout = Column(Float, default=0.0)
+    
+    # ============================================
+    # COMMON FIELDS
+    # ============================================
+    
+    # Broker Details (used for both buy and sell)
+    broker_name = Column(String(200), nullable=True)
+    broker_number = Column(String(50), nullable=True)
+    
+    # Relationships
+    user = relationship("User", back_populates="transactions")
+    items = relationship("TransactionItem", back_populates="transaction", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<Transaction(id={self.id}, symbol={self.symbol}, type={self.transaction_type}, bill={self.bill_number or self.sell_bill_number})>"
+
+
+# TransactionItem stays the same - no changes needed
+
+class TransactionItem(Base):
+    """
+    Transaction items - supports multiple entries of same script
+    Preserves business logic of adding same script multiple times to a bill
+    """
+    __tablename__ = "transaction_items"
+    
+    # Primary Key
+    id = Column(Integer, primary_key=True, index=True)
+    
+    # Foreign Key
+    transaction_id = Column(Integer, ForeignKey("transactions.id", ondelete="CASCADE"), nullable=False, index=True)
+    
+    # Item Details
+    company_name = Column(String(200), nullable=False)
+    symbol = Column(String(20), nullable=False, index=True)
+    quantity = Column(Integer, nullable=False)
+    rate = Column(Float, nullable=False)
+    amount = Column(Float, nullable=False)
+    
+    # Commission Breakdown per Item
+    commission_rate = Column(Float, default=0.0)
+    commission_amount = Column(Float, default=0.0)
+    nt_amount = Column(Float, default=0.0)  # Name Transfer Amount
+    sebn_commission = Column(Float, default=0.0)
+    eff_rate = Column(Float, default=0.0)  # Effective Rate
+    total = Column(Float, default=0.0)
+    
+    # Timestamp
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    transaction = relationship("Transaction", back_populates="items")
+
+    def __repr__(self):
+        return f"<TransactionItem(id={self.id}, symbol={self.symbol}, qty={self.quantity}, rate={self.rate})>"
+    

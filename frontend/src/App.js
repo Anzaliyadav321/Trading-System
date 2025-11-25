@@ -664,11 +664,11 @@ const BookSellPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
     const availableToSell = slPosition.remaining_quantity;
     
     if (quantity > 0 && quantity < 10) {
-      setValidationError('Quantity less than 10 will be handled as Odd Lot manually');
+      setValidationError('⚠️ Quantity less than 10 will be handled as Odd Lot manually');
     } else if (quantity > remainingTodayLimit) {
-      setValidationError(`Cannot sell more than ${remainingTodayLimit} shares today (Already sold today: ${soldToday}/${maxDailyVolume})`);
+      setValidationError(`❌ Cannot sell more than ${remainingTodayLimit} shares today (Already sold today: ${soldToday}/${maxDailyVolume})`);
     } else if (quantity > availableToSell) {
-      setValidationError(`Cannot sell more than available: ${availableToSell} (Total sold: ${slPosition.quantity_sold}/${slPosition.total_quantity})`);
+      setValidationError(`❌ Cannot sell more than available: ${availableToSell} (Total sold: ${slPosition.quantity_sold}/${slPosition.total_quantity})`);
     } else {
       setValidationError('');
     }
@@ -756,8 +756,11 @@ const BookSellPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
+      {/* UPDATED: Added flex-col and max-height */}
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        
+        {/* UPDATED: Fixed Header */}
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 flex-shrink-0">
           <h3 className="text-xl font-bold text-gray-800">Book Sell Order</h3>
           <button
             onClick={onClose}
@@ -767,98 +770,102 @@ const BookSellPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
           </button>
         </div>
 
-        <div className="mb-6">
-          <div className="bg-gradient-to-br from-red-50 to-rose-50 p-4 rounded-xl border border-red-200">
-            <div className="flex items-center mb-2">
-              <span className="font-bold text-red-800 text-xl">{signal.symbol}</span>
-              <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
-                SL Hit
-              </span>
+        {/* UPDATED: Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6">
+            <div className="bg-gradient-to-br from-red-50 to-rose-50 p-4 rounded-xl border border-red-200">
+              <div className="flex items-center mb-2">
+                <span className="font-bold text-red-800 text-xl">{signal.symbol}</span>
+                <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                  SL Hit
+                </span>
+              </div>
+              <div className="text-sm text-red-700 space-y-1">
+                <div><span className="font-medium">Total Need to Sell:</span> {needToSell} shares</div>
+                <div><span className="font-medium">Already Sold:</span> {totalSold} shares</div>
+                <div><span className="font-medium">Available to Sell:</span> {availableToSell} shares</div>
+                <div className="pt-2 border-t border-red-300 mt-2">
+                  <div><span className="font-medium">Max Today (10% limit):</span> {maxDailyVolume} shares</div>
+                  <div><span className="font-medium">Sold Today:</span> {soldToday} shares</div>
+                  <div><span className="font-medium">Can Sell Today:</span> {Math.min(remainingTodayLimit, availableToSell)} shares</div>
+                </div>
+              </div>
             </div>
-            <div className="text-sm text-red-700 space-y-1">
-              <div><span className="font-medium">Total Need to Sell:</span> {needToSell} shares</div>
-              <div><span className="font-medium">Already Sold:</span> {totalSold} shares</div>
-              <div><span className="font-medium">Available to Sell:</span> {availableToSell} shares</div>
-              <div className="pt-2 border-t border-red-300 mt-2">
-                <div><span className="font-medium">Max Today (10% limit):</span> {maxDailyVolume} shares</div>
-                <div><span className="font-medium">Sold Today:</span> {soldToday} shares</div>
-                <div><span className="font-medium">Can Sell Today:</span> {Math.min(remainingTodayLimit, availableToSell)} shares</div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Sell Quantity (Max Today: {Math.min(remainingTodayLimit, availableToSell)})
+              </label>
+              <input
+                type="number"
+                min="1"
+                max={Math.min(remainingTodayLimit, availableToSell)}
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+                disabled={loading}
+                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:border-transparent ${
+                  validationError.includes('❌') 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : validationError.includes('⚠️')
+                    ? 'border-yellow-300 focus:ring-yellow-500'
+                    : 'border-gray-200 focus:ring-red-500'
+                }`}
+              />
+              <div className="text-xs text-gray-600 mt-1 space-y-1">
+                <div>• Can sell today: <span className="font-semibold">1 to {Math.min(remainingTodayLimit, availableToSell)}</span> shares</div>
+                <div>• Less than 10 qty → Odd Lot (manual handling)</div>
+              </div>
+            </div>
+
+            {validationError && (
+              <div className={`p-3 rounded-xl text-xs font-medium ${
+                validationError.includes('❌') 
+                  ? 'bg-red-50 border border-red-200 text-red-700'
+                  : 'bg-yellow-50 border border-yellow-200 text-yellow-700'
+              }`}>
+                {validationError}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                disabled={loading}
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Total Amount</label>
+              <div className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 font-mono font-semibold text-red-800">
+                ₹{(amount || 0).toLocaleString()}
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+              <div className="text-xs text-blue-700 font-medium space-y-1">
+                <div><span className="font-semibold">Summary</span></div>
+                <div>From {availableToSell} available, selling {quantity || 0} shares today</div>
+                <div>Remaining after sale: {availableToSell - (quantity || 0)} shares</div>
+                {soldToday > 0 && (
+                  <div className="pt-1 border-t border-blue-300 mt-1">
+                    <span className="text-blue-600">Already sold today: {soldToday} shares</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Sell Quantity (Max Today: {Math.min(remainingTodayLimit, availableToSell)})
-            </label>
-            <input
-              type="number"
-              min="1"
-              max={Math.min(remainingTodayLimit, availableToSell)}
-              value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-              disabled={loading}
-              className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:border-transparent ${
-                validationError.includes('❌') 
-                  ? 'border-red-300 focus:ring-red-500' 
-                  : validationError.includes('⚠️')
-                  ? 'border-yellow-300 focus:ring-yellow-500'
-                  : 'border-gray-200 focus:ring-red-500'
-              }`}
-            />
-            <div className="text-xs text-gray-600 mt-1 space-y-1">
-              <div>• Can sell today: <span className="font-semibold">1 to {Math.min(remainingTodayLimit, availableToSell)}</span> shares</div>
-              <div>• Less than 10 qty → Odd Lot (manual handling)</div>
-            </div>
-          </div>
-
-          {validationError && (
-            <div className={`p-3 rounded-xl text-xs font-medium ${
-              validationError.includes('❌') 
-                ? 'bg-red-50 border border-red-200 text-red-700'
-                : 'bg-yellow-50 border border-yellow-200 text-yellow-700'
-            }`}>
-              {validationError}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹)</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={price}
-              onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
-              disabled={loading}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Total Amount</label>
-            <div className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 font-mono font-semibold text-red-800">
-              ₹{(amount || 0).toLocaleString()}
-            </div>
-          </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-            <div className="text-xs text-blue-700 font-medium space-y-1">
-              <div><span className="font-semibold">Summary</span></div>
-              <div>From {availableToSell} available, selling {quantity || 0} shares today</div>
-              <div>Remaining after sale: {availableToSell - (quantity || 0)} shares</div>
-              {soldToday > 0 && (
-                <div className="pt-1 border-t border-blue-300 mt-1">
-                  <span className="text-blue-600">Already sold today: {soldToday} shares</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-4 mt-8">
+        {/* UPDATED: Fixed Footer */}
+        <div className="flex justify-end space-x-4 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
           <button
             onClick={onClose}
             disabled={loading}
@@ -966,13 +973,13 @@ const BookBuyPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
     const remainingToday = maxDailyVolume - boughtToday;
     
     if (validQuantity > 0 && validPrice < 10) {
-      setValidationError(`Cannot buy: Minimum price per share must be ≥ ₹10 (currently ₹${validPrice.toFixed(2)})`);
+      setValidationError(`❌ Cannot buy: Minimum price per share must be ≥ ₹10 (currently ₹${validPrice.toFixed(2)})`);
     } else if (validQuantity > remainingToday) {
-      setValidationError(`Cannot buy more than ${remainingToday} shares today (Already bought: ${boughtToday}/${maxDailyVolume})`);
+      setValidationError(`❌ Cannot buy more than ${remainingToday} shares today (Already bought: ${boughtToday}/${maxDailyVolume})`);
     } else if (validQuantity > recommendedQty && validQuantity <= remainingToday) {
-      setValidationError(`Buying more than recommended quantity (${recommendedQty}). Max limit today: ${remainingToday}`);
+      setValidationError(`⚠️ Buying more than recommended quantity (${recommendedQty}). Max limit today: ${remainingToday}`);
     } else if (validQuantity > 0 && validQuantity < 10) {
-      setValidationError('Buying less than 10 shares - consider buying at least 10 for better execution');
+      setValidationError('⚠️ Buying less than 10 shares - consider buying at least 10 for better execution');
     } else {
       setValidationError('');
     }
@@ -1071,8 +1078,11 @@ const BookBuyPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
+      {/* ✅ UPDATED: Added flex-col and max-height */}
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        
+        {/* ✅ UPDATED: Fixed Header */}
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 flex-shrink-0">
           <h3 className="text-xl font-bold text-gray-800">Book Buy Order</h3>
           <button
             onClick={onClose}
@@ -1082,99 +1092,103 @@ const BookBuyPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
           </button>
         </div>
 
-        <div className="mb-6">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
-            <div className="flex items-center mb-2">
-              <span className="font-bold text-blue-800 text-xl">{signal.symbol || 'STOCK'}</span>
-              <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-                {industry}
-              </span>
-            </div>
-            <div className="text-sm text-blue-700 space-y-1">
-              <div><span className="font-medium">Industry Rank:</span> {industryRank}</div>
-              <div><span className="font-medium">Max Shares Today:</span> {maxDailyVolume} shares (10% Daily Volume Limit)</div>
-              {boughtToday > 0 && (
-                <div className="pt-2 border-t border-blue-300 mt-2">
-                  <div><span className="font-medium">Already Bought Today:</span> {boughtToday} shares</div>
-                  <div><span className="font-medium">Can Buy Today:</span> {remainingToday} shares</div>
-                </div>
-              )}
+        {/* UPDATED: Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+              <div className="flex items-center mb-2">
+                <span className="font-bold text-blue-800 text-xl">{signal.symbol || 'STOCK'}</span>
+                <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                  {industry}
+                </span>
+              </div>
+              <div className="text-sm text-blue-700 space-y-1">
+                <div><span className="font-medium">Industry Rank:</span> {industryRank}</div>
+                <div><span className="font-medium">Max Shares Today:</span> {maxDailyVolume} shares (10% Daily Volume Limit)</div>
+                {boughtToday > 0 && (
+                  <div className="pt-2 border-t border-blue-300 mt-2">
+                    <div><span className="font-medium">Already Bought Today:</span> {boughtToday} shares</div>
+                    <div><span className="font-medium">Can Buy Today:</span> {remainingToday} shares</div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Quantity (Max Today: {remainingToday})
-            </label>
-            <input
-              type="number"
-              min="1"
-              max={remainingToday}
-              value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-              disabled={loading}
-              className={`w-full border-2 rounded-xl px-4 py-3 text-lg font-mono focus:outline-none focus:ring-2 focus:border-transparent ${
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Quantity (Max Today: {remainingToday})
+              </label>
+              <input
+                type="number"
+                min="1"
+                max={remainingToday}
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+                disabled={loading}
+                className={`w-full border-2 rounded-xl px-4 py-3 text-lg font-mono focus:outline-none focus:ring-2 focus:border-transparent ${
+                  validationError.includes('❌') 
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : validationError.includes('⚠️')
+                    ? 'border-yellow-300 focus:ring-yellow-500'
+                    : 'border-gray-200 focus:ring-blue-500'
+                }`}
+              />
+              <div className="text-xs text-gray-600 mt-1 space-y-1">
+                <div>• Min Order Size: <span className="font-semibold">₹10 per share</span></div>
+                {boughtToday > 0 && (
+                  <div>• Already bought today: <span className="font-semibold">{boughtToday} shares</span></div>
+                )}
+              </div>
+            </div>
+
+            {validationError && (
+              <div className={`p-3 rounded-xl text-xs font-medium ${
                 validationError.includes('❌') 
-                  ? 'border-red-300 focus:ring-red-500' 
-                  : validationError.includes('⚠️')
-                  ? 'border-yellow-300 focus:ring-yellow-500'
-                  : 'border-gray-200 focus:ring-blue-500'
-              }`}
-            />
-            <div className="text-xs text-gray-600 mt-1 space-y-1">
-              <div>• Min Order Size: <span className="font-semibold">₹10 per share</span></div>
-              {boughtToday > 0 && (
-                <div>• Already bought today: <span className="font-semibold">{boughtToday} shares</span></div>
-              )}
+                  ? 'bg-red-50 border border-red-200 text-red-700'
+                  : 'bg-yellow-50 border border-yellow-200 text-yellow-700'
+              }`}>
+                {validationError}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Buy Price (₹)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="10"
+                value={price}
+                onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                disabled={loading}
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
-          </div>
 
-          {validationError && (
-            <div className={`p-3 rounded-xl text-xs font-medium ${
-              validationError.includes('❌') 
-                ? 'bg-red-50 border border-red-200 text-red-700'
-                : 'bg-yellow-50 border border-yellow-200 text-yellow-700'
-            }`}>
-              {validationError}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Total Amount</label>
+              <div className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg bg-gray-50 font-mono font-extrabold text-blue-800">
+                ₹{(amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
             </div>
-          )}
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Buy Price (₹)</label>
-            <input
-              type="number"
-              step="0.01"
-              min="10"
-              value={price}
-              onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
-              disabled={loading}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Total Amount</label>
-            <div className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg bg-gray-50 font-mono font-extrabold text-blue-800">
-              ₹{(amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-          </div>
-
-          <div className="bg-green-50 border border-green-200 rounded-xl p-3">
-            <div className="text-xs text-green-700 font-medium space-y-1">
-              <div className="text-sm font-bold">Summary</div>
-              <div>From {maxDailyVolume} max qty, today buying {currentQuantity}</div>
-              {boughtToday > 0 && (
-                <div className="pt-1 border-t border-green-300 mt-1">
-                  <span className="text-green-600">Already bought today: {boughtToday} shares</span>
-                </div>
-              )}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-3">
+              <div className="text-xs text-green-700 font-medium space-y-1">
+                <div className="text-sm font-bold">Summary</div>
+                <div>From {maxDailyVolume} max qty, today buying {currentQuantity}</div>
+                {boughtToday > 0 && (
+                  <div className="pt-1 border-t border-green-300 mt-1">
+                    <span className="text-green-600">Already bought today: {boughtToday} shares</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end space-x-4 mt-8">
+        {/*UPDATED: Fixed Footer */}
+        <div className="flex justify-end space-x-4 p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
           <button
             onClick={onClose}
             disabled={loading}
@@ -1470,61 +1484,90 @@ const Executor = ({
   );
 };
 
-// Biller Component
+
+// Enhanced Biller Component with Bill Details
 const Biller = ({ billerPositions, onSellFromBiller }) => {
+  const [selectedBill, setSelectedBill] = useState(null);
+  const [showBillDetails, setShowBillDetails] = useState(false);
+
+  const handleViewBillDetails = (position) => {
+    setSelectedBill(position);
+    setShowBillDetails(true);
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-6 hover:shadow-xl transition-all duration-300">
       <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
         <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-violet-600 text-white rounded-xl flex items-center justify-center text-sm font-bold mr-4 shadow-sm">
           6
         </div>
-        Biller
+        Biller - Transaction Records
       </h2>
+      
       <div className="h-full overflow-y-auto">
         {billerPositions && billerPositions.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-gradient-to-r from-purple-50 to-violet-50 border-b border-purple-200">
+                  <th className="text-left p-2 font-semibold text-purple-800">Bill Number</th>
+                  <th className="text-left p-2 font-semibold text-purple-800">Bill Date</th>
                   <th className="text-left p-2 font-semibold text-purple-800">Script</th>
-                  <th className="text-left p-2 font-semibold text-purple-800">ID</th>
                   <th className="text-left p-2 font-semibold text-purple-800">Qty</th>
                   <th className="text-left p-2 font-semibold text-purple-800">Buy Price</th>
-                  <th className="text-left p-2 font-semibold text-purple-800">Current Price</th>
-                  <th className="text-left p-2 font-semibold text-purple-800">SL Price</th>
-                  <th className="text-left p-2 font-semibold text-purple-800">P&L %</th>
-                  <th className="text-left p-2 font-semibold text-purple-800">Status / Action</th>
+                  <th className="text-left p-2 font-semibold text-purple-800">Effective Rate</th> {/* ✅ NEW COLUMN */}
+                  <th className="text-left p-2 font-semibold text-purple-800">Total Amount</th>
+                  <th className="text-left p-2 font-semibold text-purple-800">Commissions</th>
+                  <th className="text-left p-2 font-semibold text-purple-800">Net Amount</th>
+                  <th className="text-left p-2 font-semibold text-purple-800">Clearance Date</th>
+                  <th className="text-left p-2 font-semibold text-purple-800">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {billerPositions.map((position, i) => {
-                  const plPercent = ((position.clPrice - position.buyPrice) / position.buyPrice * 100);
-                  const isAtRisk = position.clPrice < position.slPrice;
-
+                  // Calculate Effective Rate = (Net Amount + Total Commission) / Quantity
+                  const netAmount = position.net_receivable_amount || position.amount || 0;
+                  const totalCommission = position.total_commission || 0;
+                  const effectiveRate = position.quantity > 0 
+                    ? (netAmount + totalCommission) / position.quantity 
+                    : 0;
+                  
                   return (
-                    <tr key={i} className={`border-b border-purple-100 hover:opacity-90 transition-colors ${isAtRisk ? 'bg-red-50/50' : ''}`}>
+                    <tr key={i} className="border-b border-purple-100 hover:bg-purple-50/50 transition-colors">
+                      <td className="p-2 font-mono text-purple-700 text-xs">
+                        {position.bill_number || 'N/A'}
+                      </td>
+                      <td className="p-2 text-purple-700">
+                        {position.bill_date ? new Date(position.bill_date).toLocaleDateString() : 'N/A'}
+                      </td>
                       <td className="p-2 font-bold text-purple-800">{position.symbol}</td>
-                      <td className="p-2 text-purple-700 font-mono text-xs">{position.id}</td>
                       <td className="p-2 text-purple-700 font-semibold">{position.quantity}</td>
-                      <td className="p-2 text-purple-700 font-mono text-xs">₹{position.buyPrice}</td>
-                      <td className="p-2 text-purple-700 font-mono text-xs">₹{position.clPrice}</td>
-                      <td className="p-2 text-purple-700 font-mono text-xs">₹{position.slPrice.toFixed(2)}</td>
-                      <td className={`p-2 font-semibold text-xs ${plPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {plPercent >= 0 ? '+' : ''}{plPercent.toFixed(2)}%
+                      <td className="p-2 text-purple-700 font-mono text-xs">
+                        ₹{position.buyPrice || position.price}
+                      </td>
+                      {/* ✅ NEW: Effective Rate Column */}
+                      <td className="p-2 text-purple-700 font-mono text-xs font-bold bg-purple-50">
+                        ₹{effectiveRate.toFixed(2)}
+                      </td>
+                      <td className="p-2 text-purple-700 font-mono text-xs">
+                        ₹{(position.grand_total || position.total_amount || 0).toLocaleString()}
+                      </td>
+                      <td className="p-2 text-purple-700 font-mono text-xs">
+                        ₹{(position.total_commission || 0).toFixed(2)}
+                      </td>
+                      <td className="p-2 text-purple-700 font-mono text-xs">
+                        ₹{(position.net_receivable_amount || 0).toLocaleString()}
+                      </td>
+                      <td className="p-2 text-purple-700">
+                        {position.clearance_date ? new Date(position.clearance_date).toLocaleDateString() : 'Pending'}
                       </td>
                       <td className="p-2">
-                        {isAtRisk ? (
-                          <button
-                            onClick={() => onSellFromBiller(position)}
-                            className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
-                          >
-                            SELL
-                          </button>
-                        ) : (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold border bg-green-100 text-green-700 border-green-200">
-                            SAFE
-                          </span>
-                        )}
+                        <button
+                          onClick={() => handleViewBillDetails(position)}
+                          className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
+                        >
+                          View Bill
+                        </button>
                       </td>
                     </tr>
                   );
@@ -1540,6 +1583,251 @@ const Biller = ({ billerPositions, onSellFromBiller }) => {
             <p className="text-center">No biller positions</p>
           </div>
         )}
+      </div>
+
+      {/* Bill Details Modal */}
+      {showBillDetails && selectedBill && (
+        <BillDetailsModal
+          bill={selectedBill}
+          onClose={() => {
+            setShowBillDetails(false);
+            setSelectedBill(null);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// Helper function - Add this BEFORE the BillDetailsModal component
+const convertNumberToWords = (num) => {
+  if (num === 0) return "ZERO RUPEES ONLY";
+  
+  const ones = ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
+  const tens = ['', '', 'TWENTY', 'THIRTY', 'FORTY', 'FIFTY', 'SIXTY', 'SEVENTY', 'EIGHTY', 'NINETY'];
+  const teens = ['TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'];
+  
+  const convertChunk = (n) => {
+    if (n === 0) return '';
+    if (n < 10) return ones[n];
+    if (n < 20) return teens[n - 10];
+    if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+    return ones[Math.floor(n / 100)] + ' HUNDRED' + (n % 100 ? ' ' + convertChunk(n % 100) : '');
+  };
+  
+  // Split into rupees and paisa
+  let rupees = Math.floor(num);
+  const paisa = Math.round((num - Math.floor(num)) * 100);
+  
+  let words = '';
+  
+  // Indian numbering: crore, lakh, thousand
+  if (rupees >= 10000000) {
+    words += convertChunk(Math.floor(rupees / 10000000)) + ' CRORE ';
+    rupees %= 10000000;
+  }
+  if (rupees >= 100000) {
+    words += convertChunk(Math.floor(rupees / 100000)) + ' LAKH ';
+    rupees %= 100000;
+  }
+  if (rupees >= 1000) {
+    words += convertChunk(Math.floor(rupees / 1000)) + ' THOUSAND ';
+    rupees %= 1000;
+  }
+  if (rupees > 0) {
+    words += convertChunk(rupees) + ' ';
+  }
+  
+  words += 'RUPEES';
+  
+  if (paisa > 0) {
+    words += ' AND ' + convertChunk(paisa) + ' PAISA';
+  }
+  
+  return words.trim() + ' ONLY';
+};
+
+// Bill Details Modal Component
+const BillDetailsModal = ({ bill, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-500 to-violet-600 text-white p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-2xl font-bold">Transaction Bill Details</h3>
+              <p className="text-purple-100 text-sm mt-1">
+                Bill Number: {bill.bill_number || 'N/A'}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+          {/* Bill Header Info */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
+              <div className="text-sm text-purple-600 mb-1">Bill Date</div>
+              <div className="text-lg font-bold text-purple-800">
+                {bill.bill_date ? new Date(bill.bill_date).toLocaleDateString() : 'N/A'}
+              </div>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
+              <div className="text-sm text-purple-600 mb-1">Clearance Date</div>
+              <div className="text-lg font-bold text-purple-800">
+                {bill.clearance_date ? new Date(bill.clearance_date).toLocaleDateString() : 'Pending'}
+              </div>
+            </div>
+          </div>
+
+          {/* Broker Information */}
+          {(bill.broker_name || bill.broker_number) && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <h4 className="font-bold text-blue-800 mb-2">Broker Information</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-sm text-blue-600">Broker Name:</span>
+                  <p className="font-semibold text-blue-800">{bill.broker_name || 'N/A'}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-blue-600">Broker Number:</span>
+                  <p className="font-semibold text-blue-800">{bill.broker_number || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Transaction Items */}
+          {bill.items && bill.items.length > 0 && (
+            <div className="mb-6">
+              <h4 className="font-bold text-gray-800 mb-3">Transaction Items</h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-purple-50 to-violet-50 border-b-2 border-purple-200">
+                      <th className="text-left p-3 font-semibold text-purple-800">Company Name</th>
+                      <th className="text-left p-3 font-semibold text-purple-800">Symbol</th>
+                      <th className="text-right p-3 font-semibold text-purple-800">Qty</th>
+                      <th className="text-right p-3 font-semibold text-purple-800">Rate</th>
+                      <th className="text-right p-3 font-semibold text-purple-800">Amount</th>
+                      <th className="text-right p-3 font-semibold text-purple-800">Commission</th>
+                      <th className="text-right p-3 font-semibold text-purple-800">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bill.items.map((item, idx) => (
+                      <tr key={idx} className="border-b border-purple-100 hover:bg-purple-50/30">
+                        <td className="p-3 text-gray-700">{item.company_name}</td>
+                        <td className="p-3 font-bold text-purple-800">{item.symbol}</td>
+                        <td className="p-3 text-right font-semibold">{item.quantity}</td>
+                        <td className="p-3 text-right font-mono">₹{item.rate.toFixed(2)}</td>
+                        <td className="p-3 text-right font-mono">₹{item.amount.toLocaleString()}</td>
+                        <td className="p-3 text-right font-mono text-red-600">
+                          ₹{(item.commission_amount || 0).toFixed(2)}
+                        </td>
+                        <td className="p-3 text-right font-mono font-bold">
+                          ₹{(item.total || item.amount).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Financial Summary */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+              <h4 className="font-bold text-green-800 mb-3">Transaction Summary</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-green-600">Share Amount:</span>
+                  <span className="font-bold text-green-800">₹{(bill.share_amount || 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-green-600">Share Quantity:</span>
+                  <span className="font-bold text-green-800">{bill.share_quantity || 0}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-green-300">
+                  <span className="text-green-600">Sub Total:</span>
+                  <span className="font-bold text-green-800">₹{(bill.sub_total || 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-green-600 font-bold">Grand Total:</span>
+                  <span className="font-bold text-green-800 text-lg">₹{(bill.grand_total || 0).toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-red-50 p-4 rounded-xl border border-red-200">
+              <h4 className="font-bold text-red-800 mb-3">Commission Breakdown</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-red-600">SEBN Commission:</span>
+                  <span className="font-mono text-red-800">₹{(bill.sebn_commission || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-600">NEPSE Commission:</span>
+                  <span className="font-mono text-red-800">₹{(bill.nepse_commission || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-600">SEBON Regulatory Fee:</span>
+                  <span className="font-mono text-red-800">₹{(bill.sebon_regulatory_fee || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-600">Broker Commission:</span>
+                  <span className="font-mono text-red-800">₹{(bill.broker_commission || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-600">Name Transfer:</span>
+                  <span className="font-mono text-red-800">₹{(bill.name_transfer_amount || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-600">DP Amount:</span>
+                  <span className="font-mono text-red-800">₹{(bill.dp_amount || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-red-300">
+                  <span className="text-red-600 font-bold">Total Commission:</span>
+                  <span className="font-bold text-red-800">₹{(bill.total_commission || 0).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* UPDATED: Net Receivable with Dynamic Amount in Words */}
+          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-bold text-blue-800">Net Receivable Amount:</span>
+              <span className="text-2xl font-bold text-blue-900">
+                ₹{(bill.net_receivable_amount || 0).toLocaleString()}
+              </span>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              Amount in Words: {convertNumberToWords(bill.net_receivable_amount || 0)}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 text-white rounded-lg font-semibold transition-all shadow-md"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1712,11 +2000,6 @@ const SignalAnalysis = ({ token, signals }) => {
                 {historicalSubTab === 'all' && 'All Signals (Last 14 Days)'}
               </h3>
             </div>
-            {/* <p className="text-sm text-blue-700">
-              {historicalSubTab === 'buy' && 'Shows all BUY signals generated with PO\'s fixed rules (RSI ≥ 60, Close > MA50, MACD > Signal, Volume ≥ 1.1× Prev)'}
-              {historicalSubTab === 'sell' && 'Shows positions that were sold due to stop-loss hits or manual exits'}
-              {historicalSubTab === 'all' && 'Shows complete signal history including BUY and REJECT with reasons'}
-            </p> */}
           </div>
 
           {/* Signals Count Badge */}
@@ -1844,7 +2127,6 @@ const SignalAnalysis = ({ token, signals }) => {
               <div className="grid grid-cols-3 gap-4 items-center">
                 <div>
                   <label className="block text-sm font-semibold text-purple-700">RSI Threshold</label>
-                  {/* <p className="text-xs text-purple-600">Rule: 60</p> */}
                 </div>
                 <div>
                   <input
@@ -1868,7 +2150,6 @@ const SignalAnalysis = ({ token, signals }) => {
               <div className="grid grid-cols-3 gap-4 items-center">
                 <div>
                   <label className="block text-sm font-semibold text-purple-700">MA50 Buffer (%)</label>
-                  {/* <p className="text-xs text-purple-600">Rule: 0%</p> */}
                 </div>
                 <div>
                   <input
@@ -1882,18 +2163,12 @@ const SignalAnalysis = ({ token, signals }) => {
                     placeholder="0"
                   />
                 </div>
-                {/* <div>
-                  <p className="text-xs text-purple-600">
-                    Close &gt; MA50 × <span className="font-bold">{(1 + (thresholds.ma_buffer || 0) / 100).toFixed(2)}</span>
-                  </p>
-                </div> */}
               </div>
 
               {/* Volume Multiplier - Inline */}
               <div className="grid grid-cols-3 gap-4 items-center">
                 <div>
                   <label className="block text-sm font-semibold text-purple-700">Volume Multiplier</label>
-                  {/* <p className="text-xs text-purple-600">Rule: 1.1×</p> */}
                 </div>
                 <div>
                   <input
@@ -1907,11 +2182,6 @@ const SignalAnalysis = ({ token, signals }) => {
                     placeholder="1.1"
                   />
                 </div>
-                {/* <div>
-                  <p className="text-xs text-purple-600">
-                    Volume ≥ Prev × <span className="font-bold">{thresholds.volume_multiplier || 1.1}</span>
-                  </p>
-                </div> */}
               </div>
 
               {/* Divider */}
@@ -2213,7 +2483,7 @@ function TradingDashboard() {
     const processedSignals = (data.signals || []).map(signal => ({
       symbol: signal.symbol || '',
       close: signal.price || signal.close || 0,
-      recommendation: signal.recommendation || 'REJECT',  // ✅ FIXED: use 'recommendation' not 'signal'
+      recommendation: signal.recommendation || 'REJECT',  // FIXED: use 'recommendation' not 'signal'
       quantity: signal.quantity || 100,
       industry: signal.industry || 'N/A',
       industryRank: signal.industryRank || '#N/A',
@@ -2555,12 +2825,35 @@ useEffect(() => {
     setShowBookSellPopup(true);
   };
 
-  const handleBookBuyConfirm = (orderDetails) => {
+  const handleBookBuyConfirm = async (orderDetails) => {
     const transitOrder = {
       ...orderDetails,
       transitDate: new Date().toLocaleString(),
       exactPrice: orderDetails.close,
-      qty: orderDetails.quantity
+      qty: orderDetails.quantity,
+      
+      // NEW: Bill details (will be filled when moved to biller)
+      bill_number: `B/${Date.now().toString().slice(-7)}/081-082`,
+      bill_date: new Date().toISOString().split('T')[0],
+      sub_total: orderDetails.amount,
+      grand_total: orderDetails.amount,
+      share_amount: orderDetails.amount,
+      share_quantity: orderDetails.quantity,
+      
+      // Commission calculations (example - adjust as needed)
+      sebn_commission: orderDetails.amount * 0.00033,
+      nepse_commission: orderDetails.amount * 0.00214,
+      sebon_regulatory_fee: orderDetails.amount * 0.0001618,
+      broker_commission: orderDetails.amount * 0.0085,
+      name_transfer_amount: 0,
+      dp_amount: 50,
+      total_commission: orderDetails.amount * 0.0107053 + 50,
+      
+      clearance_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // T+3
+      net_receivable_amount: orderDetails.amount + (orderDetails.amount * 0.0107053 + 50),
+      
+      broker_name: "SUN SECURITIES PVT LTD",
+      broker_number: "64"
     };
 
     const msg = `Buy order booked and sent to transit: ${orderDetails.symbol} @ ₹${orderDetails.close} | Qty: ${orderDetails.quantity} | Amount: ₹${(orderDetails.amount || 0).toLocaleString()}`;
@@ -2585,6 +2878,21 @@ useEffect(() => {
     setExecutorLogs(prev => [...prev, { message: msg, timestamp: new Date().toLocaleTimeString(), type: 'book_sell' }]);
 
     setSalesInTransit(prev => [...prev, saleOrder]);
+  };
+
+  const handleSellFromBiller = (position) => {
+  // When user clicks "Sell" from Biller, open the sell popup
+    setSelectedSignal({
+      symbol: position.symbol,
+      quantity: position.quantity,
+      clPrice: position.clPrice || position.buyPrice,
+      buyPrice: position.buyPrice,
+      avBuyPrice: position.buyPrice,
+      slPrice: position.slPrice || (position.buyPrice * 0.95),
+      industry: position.industry || 'N/A',
+      previousDayVolume: 2000
+    });
+    setShowBookSellPopup(true);
   };
 
   const handleConfirmToRisk = (order) => {
@@ -2641,11 +2949,56 @@ useEffect(() => {
     const msg = `Sale completed: ${sale.symbol} @ ₹${sale.salePrice} | Qty: ${sale.saleQuantity} | P&L: ₹${profit.toFixed(2)}`;
     setExecutorLogs(prev => [...prev, { message: msg, timestamp: new Date().toLocaleTimeString(), type: 'sale_confirmed' }]);
 
-    setSalesInTransit(prev => prev.filter(s => s.symbol !== sale.symbol));
+    setSalesInTransit(prev => prev.filter(s => 
+      !(s.symbol === sale.symbol && s.saleQuantity === sale.saleQuantity && s.transitDate === sale.transitDate)
+    ));
 
     setCashBalance(prev => prev + saleAmount);
-    setRisk(prev => prev.filter(p => p.symbol !== sale.symbol));
-    setBillerPositions(prev => prev.filter(p => p.symbol !== sale.symbol));
+    
+    // ✅ FIX: Only reduce the sold quantity, don't remove entire position
+    setRisk(prev => prev.map(pos => {
+      if (pos.symbol === sale.symbol) {
+        const newQty = pos.quantity - sale.saleQuantity;
+        if (newQty <= 0) {
+          return null; // Remove if fully sold
+        }
+        // Recalculate amount with remaining quantity
+        return {
+          ...pos,
+          quantity: newQty,
+          totalQuantity: newQty,
+          amount: pos.avBuyPrice * newQty
+        };
+      }
+      return pos;
+    }).filter(Boolean)); // Remove nulls
+    
+    // FIX: Update biller positions - use FIFO (First In, First Out)
+    setBillerPositions(prev => {
+      let remainingToSell = sale.saleQuantity;
+      const updated = [];
+      
+      for (const pos of prev) {
+        if (pos.symbol === sale.symbol && remainingToSell > 0) {
+          if (pos.quantity <= remainingToSell) {
+            // Fully sold this position
+            remainingToSell -= pos.quantity;
+            // Don't add to updated array (remove it)
+          } else {
+            // Partially sold
+            updated.push({
+              ...pos,
+              quantity: pos.quantity - remainingToSell
+            });
+            remainingToSell = 0;
+          }
+        } else {
+          updated.push(pos);
+        }
+      }
+      
+      return updated;
+    });
   };
 
   const handleSellToTransit = (riskPosition) => {
@@ -2666,24 +3019,7 @@ useEffect(() => {
     setSalesInTransit(prev => [...prev, saleOrder]);
   };
 
-  const handleSellFromBiller = (billerPosition) => {
-    const salePrice = billerPosition.clPrice * 0.95;
-    const saleOrder = {
-      symbol: billerPosition.symbol,
-      saleQuantity: billerPosition.quantity,
-      salePrice,
-      saleAmount: salePrice * billerPosition.quantity,
-      avBuyPrice: billerPosition.buyPrice,
-      saleReason: "SL Hit from Biller",
-      transitDate: new Date().toLocaleString(),
-      billerId: billerPosition.id
-    };
-
-    const msg = `Sale order sent to transit from Biller: ${billerPosition.symbol} (ID: ${billerPosition.id}) @ ₹${salePrice.toFixed(2)} | Qty: ${billerPosition.quantity}`;
-    setExecutorLogs(prev => [...prev, { message: msg, timestamp: new Date().toLocaleTimeString(), type: 'sell_transit' }]);
-
-    setSalesInTransit(prev => [...prev, saleOrder]);
-  };
+ 
 
 
   // ADD sector NEW FUNCTION HERE:
@@ -2720,16 +3056,29 @@ useEffect(() => {
   };
 
   const handleAddIndustry = () => {
-    if (newIndustry.sector.trim()) {
-      const maxRank = Math.max(...industryPreferences.map(ind => ind.rank), 0);
-      const industryToAdd = {
-        ...newIndustry,
-        rank: maxRank + 1
-      };
-      setIndustryPreferences(prev => [...prev, industryToAdd]);
-      setNewIndustry({ sector: '', rank: 1, weightage: 0, enabled: true });
-      setShowAddIndustry(false);
+    if (!newIndustry.sector.trim()) {
+      alert('Please select an industry');
+      return;
     }
+    
+    // Check if industry already exists
+    const isDuplicate = industryPreferences.some(
+      ind => ind.sector.toLowerCase() === newIndustry.sector.toLowerCase()
+    );
+    
+    if (isDuplicate) {
+      alert(`"${newIndustry.sector}" is already in your preferences. Each industry can only be added once.`);
+      return;
+    }
+    
+    const maxRank = Math.max(...industryPreferences.map(ind => ind.rank), 0);
+    const industryToAdd = {
+      ...newIndustry,
+      rank: maxRank + 1
+    };
+    setIndustryPreferences(prev => [...prev, industryToAdd]);
+    setNewIndustry({ sector: '', rank: 1, weightage: 0, enabled: true });
+    setShowAddIndustry(false);
   };
 
   const removeIndustry = (index) => {

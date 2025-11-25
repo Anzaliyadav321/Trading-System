@@ -1,13 +1,15 @@
-#backend/main.py
+# backend/main.py
 from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 from jose import jwt, JWTError
 from pathlib import Path
 from dotenv import load_dotenv
 from backend.core.api.sectors import router as sectors_router
+from backend.core.trading.sell_routes import router as sell_router  
+import time
 import bcrypt
 import random
 import os
@@ -20,10 +22,14 @@ import subprocess
 # Load environment variables FIRST
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
+from backend.core.config import settings  # Use existing config
+
+
 # File paths for signals
 BACKEND_DIR = Path(__file__).resolve().parent
 MASTER_PATH = BACKEND_DIR / "core" / "data" / "master_data.csv"
 ALL_SIGNALS_PATH = BACKEND_DIR / "core" / "data" / "all_signals.csv"
+
 
 # Local imports
 from backend.core.database import Base, engine, SessionLocal
@@ -35,12 +41,14 @@ from backend.core.auth.schemas import StopLossCreate
 from backend.core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
 from backend.core.auth.email_service import send_verification_email
 
-
+# MPORT FROM dependencies.py (not defined in main.py anymore)
+from backend.core.auth.dependencies import get_current_user, get_db, get_user_by_email
 
 # App initialization
 app = FastAPI(title="Trading System with JWT + OTP + DB Orders", version="1.0.0")
 
 app.include_router(sectors_router)
+app.include_router(sell_router)  
 
 
 def run_merolagani_pipeline():
@@ -81,13 +89,13 @@ def run_merolagani_pipeline():
         print(f"{'='*80}\n")
         import traceback
         traceback.print_exc()
+
 # Initialize scheduler
 scheduler = BackgroundScheduler()
 scheduler.add_job(run_merolagani_pipeline, "cron", hour=14, minute=15)
 scheduler.start()
 
 
-# UPDATED STARTUP EVENT
 @app.on_event("startup")
 def startup_event():
     print("\n" + "="*80)
@@ -95,15 +103,10 @@ def startup_event():
     print("="*80)
     
     try:
-        # Import all models to ensure they're registered
         from backend.core.auth import models
-        
-        # Create all tables
         Base.metadata.create_all(bind=engine)
-        
         print("Database tables created successfully!")
         
-        # Verify tables were created
         from sqlalchemy import inspect
         inspector = inspect(engine)
         tables = inspector.get_table_names()
@@ -113,7 +116,6 @@ def startup_event():
             print(f"   {table}")
         print("="*80 + "\n")
         
-        # ADD THIS: Log database connection type
         DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./trading.db")
         if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
             print("[INFO] Connected to PostgreSQL (Production)")
@@ -126,13 +128,14 @@ def startup_event():
         print(f"[ERROR] Failed to initialize database: {e}")
         import traceback
         traceback.print_exc()
-        raise  # Re-raise to prevent app from starting with broken DB
+        raise
+
 @app.on_event("shutdown")
 def shutdown_event():
     scheduler.shutdown()
 
-SECRET_KEY = os.getenv("SECRET_KEY", "your_super_secret_key_here")
-ALGORITHM = "HS256"
+# SECRET_KEY = os.getenv("SECRET_KEY", "8eaf6b8f3b9a4f048c18c0f88e9fbc2c2b3f31bb4c20e21a2d41c8a3b2d9f10e")
+# ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 # Allow CORS for frontend
@@ -147,47 +150,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
-# Cache for signals (to avoid recalculating on every request)
+# Cache for signals
 _signals_cache = None
 _cache_timestamp = None
 
-# Database utilities
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 # JWT helpers
+
+
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
+    current_time = datetime.now(timezone.utc)  #  Use timezone-aware datetime
+    expire = current_time + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    
+    # Get timestamp from timezone-aware datetime
+    exp_timestamp = int(expire.timestamp())
+    to_encode.update({"exp": exp_timestamp})
+    
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    
+    print(f"[TOKEN CREATE] User: {data.get('sub')}")
+    print(f"[TOKEN CREATE] Current time (UTC): {current_time}")
+    print(f"[TOKEN CREATE] Expires at (UTC): {expire}")
+    print(f"[TOKEN CREATE] Expires timestamp: {exp_timestamp}")
+    print(f"[TOKEN CREATE] Duration: {ACCESS_TOKEN_EXPIRE_MINUTES} minutes")
+    
+    return encoded_jwt
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
-def get_user_by_email(db, email: str):
-    return db.query(User).filter(User.email == email).first()
-
-def get_current_user(token: str = Depends(oauth2_scheme), db=Depends(get_db)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
-        if not email:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-        user = get_user_by_email(db, email)
-        if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        if not user.is_verified:
-            raise HTTPException(status_code=403, detail="Email not verified")
-        return user
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
+# Add this temporarily to your main.py to debug
+@app.get("/debug/time")
+def debug_time():
+    from datetime import datetime
+    now = datetime.utcnow()
+    return {
+        "utcnow": str(now),
+        "timestamp": now.timestamp(),
+        "year": now.year,
+        "token_would_expire_at": (now + timedelta(minutes=60)).timestamp()
+    }
 
 # Helper function to calculate recommended quantity
 def calculate_recommended_quantity(signal):
@@ -197,23 +198,17 @@ def calculate_recommended_quantity(signal):
         if price == 0 or price < 10:
             return 0
         
-        # Get previous day volume
         prev_volume = signal.get("Prev_Volume")
         if prev_volume and pd.notna(prev_volume):
             prev_vol_int = int(float(prev_volume))
-            # Recommend up to 10% of previous day volume
             max_qty = int(prev_vol_int * 0.1)
-            
-            # Cap at reasonable amount (~Rs. 50,000 worth)
             max_amount = 50000
             qty_by_amount = int(max_amount / price)
-            
-            return min(max_qty, qty_by_amount, 500)  # Max 500 shares
+            return min(max_qty, qty_by_amount, 500)
         
-        # Default: buy enough for ~Rs. 10,000 position
         return max(10, min(int(10000 / price), 200))
     except:
-        return 100  # Default fallback
+        return 100
 
 # Schemas
 class RegisterRequest(BaseModel):
@@ -232,7 +227,7 @@ class OrderBooking(BaseModel):
     symbol: str
     quantity: int
     price: float
-    order_type: str  # BUY or SELL
+    order_type: str
 
 # Authentication Routes
 @app.post("/auth/register")
@@ -289,6 +284,8 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db=Depend
 @app.get("/auth/me")
 async def get_me(current_user: User = Depends(get_current_user)):
     return {"email": current_user.email, "verified": current_user.is_verified}
+
+
 
 # Signal Routes (Using Real NEPSE Data)
 @app.get("/signals/today")
@@ -401,7 +398,7 @@ async def refresh_signals(current_user: User = Depends(get_current_user)):
                 "symbol": row.get("symbol", "N/A"),
                 "price": float(row.get("close", 0)),
                 "change": round(change_pct, 2),
-                "recommendation": row.get("Recommendation", "REJECT"),  # ✅ CHANGED: from "signal" to "recommendation", from "HOLD" to "REJECT"
+                "recommendation": row.get("Recommendation", "REJECT"),  # CHANGED: from "signal" to "recommendation", from "HOLD" to "REJECT"
                 "quantity": calculate_recommended_quantity(row),
                 "rsi": round(float(row.get("RSI", 0)), 2) if pd.notna(row.get("RSI")) else None,
                 "ma50": round(float(row.get("MA50", 0)), 2) if pd.notna(row.get("MA50")) else None,
@@ -440,7 +437,7 @@ async def refresh_signals(current_user: User = Depends(get_current_user)):
             detail=f"Failed to refresh signals: {str(e)}"
         )
 
-# ✅ NEW ENDPOINT: Get historical signals for Signal Analysis component
+# NEW ENDPOINT: Get historical signals for Signal Analysis component
 @app.get("/signals/historical")
 async def get_historical_signals(
     days: int = 14,
@@ -480,7 +477,7 @@ async def get_historical_signals(
                 "symbol": signal.get("symbol", "N/A"),
                 "price": float(signal.get("close", 0)),
                 "change": round(change_pct, 2),
-                "recommendation": signal.get("Recommendation", "REJECT"),  # ✅ Use "recommendation"
+                "recommendation": signal.get("Recommendation", "REJECT"),  # Use "recommendation"
                 "quantity": calculate_recommended_quantity(signal),
                 "rsi": round(float(signal.get("RSI", 0)), 2) if pd.notna(signal.get("RSI")) else None,
                 "ma50": round(float(signal.get("MA50", 0)), 2) if pd.notna(signal.get("MA50")) else None,

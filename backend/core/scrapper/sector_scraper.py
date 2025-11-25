@@ -21,12 +21,12 @@ from datetime import datetime
 
 # Configuration
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-MASTER_CSV = DATA_DIR / "Master_data.csv"
+MASTER_CSV = DATA_DIR / "master_data.csv"
 SECTORS_JSON = DATA_DIR / "sectors.json"
 SECTOR_LIST_JSON = DATA_DIR / "sector_list.json"
 
 BASE_URL = "https://merolagani.com/CompanyDetail.aspx?symbol={}"
-REQUEST_DELAY = 2  # Seconds between requests (be nice to server)
+REQUEST_DELAY = 2  # Seconds between requests (
 
 # Sector name normalization (Merolagani might have variations)
 SECTOR_ALIASES = {
@@ -301,7 +301,7 @@ def save_outputs(symbol_to_sector, sectors):
     print(f"      Saved to {SECTOR_LIST_JSON}")
     
     # 3. Update Master_data.csv with sector column
-    print("[3/3] Updating Master_data.csv with sector column...")
+    print("[3/3] Updating master_data.csv with sector column...")
     df = pd.read_csv(MASTER_CSV)
     
     # Add sector column by mapping symbols
@@ -376,7 +376,6 @@ def main():
     # Print summary
     print_summary(sectors)
     
-    print("\n SECTOR SCRAPING COMPLETE!")
    
 
 
