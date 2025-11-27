@@ -1,4 +1,12 @@
 # backend/main.py
+import sys
+import os
+
+# Fix import path for Render deployment
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,9 +26,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 
 # Load environment variables FIRST
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
