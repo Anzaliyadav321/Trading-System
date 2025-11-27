@@ -51,7 +51,7 @@
 
 import httpx
 from fastapi import HTTPException
-from backend.core.config import settings
+from core.config import settings
 
 BREVO_API_KEY = settings.BREVO_API_KEY
 BREVO_SENDER_EMAIL = settings.BREVO_SENDER_EMAIL

@@ -9,9 +9,10 @@ const AuthContext = React.createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true); // CHANGE 1: Change from false to true
+  const [loading, setLoading] = useState(true); 
+  const [isSuperuser, setIsSuperuser] = useState(false); 
 
-  // ⬅️ CHANGE 2: Add this NEW useEffect to load token from localStorage on mount
+  // CHANGE 2: Add this NEW useEffect to load token from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     if (savedToken) {
@@ -23,7 +24,11 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('token', token); // CHANGE 3: Add this line to save token
+      localStorage.setItem('token', token);
+      
+      //  ADD: Load superuser status
+      const superuserStatus = localStorage.getItem('is_superuser') === 'true';
+      setIsSuperuser(superuserStatus);
       
       fetch(`${API_BASE_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -32,14 +37,21 @@ export const AuthProvider = ({ children }) => {
         .then(data => {
           if (data.email) {
             setUser(data);
+            // ADD: Update superuser status from /me endpoint
+            if (data.is_superuser !== undefined) {
+              setIsSuperuser(data.is_superuser);
+              localStorage.setItem('is_superuser', data.is_superuser);
+            }
           } else {
             setToken(null);
-            localStorage.removeItem('token'); // ⬅️ CHANGE 4: Add this line
+            localStorage.removeItem('token');
+            localStorage.removeItem('is_superuser'); 
           }
         })
         .catch(() => {
           setToken(null);
-          localStorage.removeItem('token'); // ⬅️ CHANGE 5: Add this line
+          localStorage.removeItem('token');
+          localStorage.removeItem('is_superuser'); 
         })
         .finally(() => setLoading(false));
     } else {
@@ -48,27 +60,34 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const formData = new URLSearchParams();
-    formData.append("username", email);
-    formData.append("password", password);
-
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {  //Fixed URL
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
       },
-      body: formData,
+      body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json();  // Fixed variable name
+    const data = await res.json();
 
-    if (!res.ok) {  // Fixed variable name
+    if (!res.ok) {
       throw new Error(data.detail || 'Login failed');
     }
 
     setToken(data.access_token);
+    
+    // ✅ Store user data
+    if (data.user) {
+      setUser(data.user);
+      setIsSuperuser(data.user.is_superuser || false);
+      localStorage.setItem('is_superuser', data.user.is_superuser || false);
+      console.log('🔍 Login successful:', data.user.email);
+      console.log('🔍 Is Superuser:', data.user.is_superuser);
+    }
+    
     return data;
-   };
+  };
+   
   const register = async (email, password) => {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
@@ -104,11 +123,13 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('token'); 
+    setIsSuperuser(false); 
+    localStorage.removeItem('token');
+    localStorage.removeItem('is_superuser'); 
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, verifyOTP, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, verifyOTP, logout, loading, isSuperuser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -509,7 +530,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegistrationSuccess }) => {
 // ============================================
 
 const AuthWrapper = ({ children }) => {
-  const { token, loading, logout, user } = useAuth();
+  const { token, loading, logout, user, isSuperuser } = useAuth(); // ✅ Added isSuperuser
   const [showForm, setShowForm] = useState('login');
   const [registeredEmail, setRegisteredEmail] = useState('');
 
@@ -555,6 +576,13 @@ const AuthWrapper = ({ children }) => {
   return (
     <div className="relative">
       <div className="fixed top-4 right-4 z-[9999] flex items-center space-x-3 bg-white/95 backdrop-blur-sm rounded-xl p-2 shadow-lg border border-gray-200">
+        {isSuperuser && (
+          <div className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center space-x-2">
+            <span className="text-lg">👑</span>
+            <span className="text-xs font-bold text-white">PO/ADMIN</span>
+          </div>
+        )}
+        
         <div className="px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
           <p className="text-xs text-gray-700 font-medium">{user?.email}</p>
         </div>
@@ -1078,10 +1106,10 @@ const BookBuyPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* ✅ UPDATED: Added flex-col and max-height */}
+      {/* UPDATED: Added flex-col and max-height */}
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
         
-        {/* ✅ UPDATED: Fixed Header */}
+        {/* UPDATED: Fixed Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200 flex-shrink-0">
           <h3 className="text-xl font-bold text-gray-800">Book Buy Order</h3>
           <button
@@ -1215,112 +1243,121 @@ const BookBuyPopup = ({ signal, isOpen, onClose, onConfirm, token }) => {
 
 
 // Buy Signals Ticker Component
+
 const BuySignalsTicker = ({ signals, setSignals }) => {
-    const buySignals = signals.filter(signal => signal.recommendation === "BUY");
-    const shouldScroll = buySignals.length > 5;
+  const buySignals = signals.filter(s => s.recommendation === "BUY");
 
-    const [priceHistory, setPriceHistory] = useState({});
+  useEffect(() => {
+    if (buySignals.length === 0) return;
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setSignals(prevSignals => prevSignals.map(signal => {
-                if (signal.recommendation === "BUY") {
-                    const change = (Math.random() - 0.5) * 5;
-                    const newPrice = Math.max(0, parseFloat(signal.close) + change).toFixed(2);
-                    const oldPrice = priceHistory[signal.symbol];
+    const interval = setInterval(() => {
+      setSignals(prevSignals => {
+        return prevSignals.map(signal => {
+          if (signal.recommendation === "BUY") {
+            const change = (Math.random() - 0.5) * 5;
+            const newPrice = Math.max(0, parseFloat(signal.close) + change).toFixed(2);
+            
+            let color = "gray";
+            if (signal.prevClose) {
+              if (parseFloat(newPrice) > parseFloat(signal.prevClose)) color = "green";
+              else if (parseFloat(newPrice) < parseFloat(signal.prevClose)) color = "red";
+            }
+            
+            return { ...signal, close: newPrice, prevClose: signal.close, color: color };
+          }
+          return signal;
+        });
+      });
+    }, 2000);
 
-                    if (oldPrice !== undefined) {
-                        if (parseFloat(newPrice) > parseFloat(oldPrice)) {
-                            signal.color = "green";
-                        } else if (parseFloat(newPrice) < parseFloat(oldPrice)) {
-                            signal.color = "red";
-                        } else {
-                            signal.color = "gray";
-                        }
-                    } else {
-                        signal.color = "gray";
-                    }
-                    setPriceHistory(prev => ({ ...prev, [signal.symbol]: newPrice }));
-                    return { ...signal, close: newPrice };
-                }
-                return signal;
-            }));
-        }, 2000);
+    return () => clearInterval(interval);
+  }, [buySignals.length, setSignals]);
 
-        return () => clearInterval(interval);
-    }, [signals, priceHistory, setSignals]);
-
+  if (buySignals.length === 0) {
     return (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 mb-6 overflow-hidden">
-            <div className="flex items-center mb-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                <h3 className="text-sm font-bold text-green-800">Buy Signals Today</h3>
-                <span className="ml-2 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
-                    {buySignals.length} Active
-                </span>
-            </div>
-
-            <div className="relative">
-                {buySignals.length > 0 ? (
-                    <div className={`flex ${shouldScroll ? 'animate-scroll-rtl' : 'justify-start'} whitespace-nowrap`}>
-                        <div className="flex space-x-6">
-                            {buySignals.map((signal, index) => (
-                                <div
-                                    key={index}
-                                    className="inline-flex items-center bg-white/80 backdrop-blur-sm border border-green-200 rounded-lg px-4 py-2 shadow-sm hover:shadow-md transition-all duration-200"
-                                >
-                                    <div className="flex flex-col items-start">
-                                        <div className="flex items-center mb-1">
-                                            <span className="font-bold text-green-800 text-lg mr-2">
-                                                {signal.symbol}
-                                            </span>
-                                            <span
-                                                className={`font-semibold text-lg ${
-                                                    signal.color === "green" ? "text-green-600" :
-                                                    signal.color === "red" ? "text-red-600" : "text-gray-600"
-                                                }`}
-                                            >
-                                                (₹{signal.close})
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="ml-3 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                </div>
-                            ))}
-                            {shouldScroll && buySignals.map((signal, index) => (
-                                <div
-                                    key={`duplicate-${index}`}
-                                    className="inline-flex items-center bg-white/80 backdrop-blur-sm border border-green-200 rounded-lg px-4 py-2 shadow-sm hover:shadow-md transition-all duration-200"
-                                >
-                                    <div className="flex flex-col items-start">
-                                        <div className="flex items-center mb-1">
-                                            <span className="font-bold text-green-800 text-lg mr-2">
-                                                {signal.symbol}
-                                            </span>
-                                            <span
-                                                className={`font-semibold text-lg ${
-                                                    signal.color === "green" ? "text-green-600" :
-                                                    signal.color === "red" ? "text-red-600" : "text-gray-600"
-                                                }`}
-                                            >
-                                                (₹{signal.close})
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="ml-3 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-4">
-                        <span className="text-green-600 text-sm">No buy signals available today</span>
-                    </div>
-                )}
-            </div>
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6 shadow-lg">
+        <div className="flex items-center justify-center text-gray-500">
+          <span className="text-lg font-medium">No Buy Signals Today</span>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl shadow-lg overflow-hidden w-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-3 bg-white/50 border-b border-green-200">
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-lg font-bold text-green-700">Buy Signals Today</span>
+        </div>
+        <span className="text-sm font-semibold text-green-600 bg-green-100 px-3 py-1 rounded-full">
+          {buySignals.length} Active
+        </span>
+      </div>
+
+      {/* Ticker Container - FIXED HEIGHT, contained within parent width */}
+      <div className="relative overflow-hidden h-32 w-full">
+        {/* Animated wrapper - will move continuously */}
+        <div 
+          className="absolute top-0 left-0 flex items-center h-full"
+          style={{
+            animation: 'tickerMove 90s linear infinite',
+            paddingTop: '1rem',
+            paddingBottom: '1rem',
+            willChange: 'transform'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.animationPlayState = 'paused'}
+          onMouseLeave={(e) => e.currentTarget.style.animationPlayState = 'running'}
+        >
+          {/* Render signals 3 times for seamless loop */}
+          {[...Array(3)].map((_, copyIndex) => (
+            <div key={copyIndex} className="flex space-x-4 px-2">
+              {buySignals.map((signal, idx) => (
+                <div
+                  key={`${copyIndex}-${idx}`}
+                  className="flex-shrink-0 bg-white rounded-xl border-2 border-green-300 px-4 py-2 shadow-sm min-w-[200px] max-w-[200px]"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-gray-800 text-lg">{signal.symbol}</span>
+                    <div className={`w-2 h-2 rounded-full ${
+                      signal.color === 'green' ? 'bg-green-500' :
+                      signal.color === 'red' ? 'bg-red-500' : 'bg-gray-400'
+                    }`}></div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-500">₹</span>
+                    <span className={`font-mono font-semibold text-base ${
+                      signal.color === 'green' ? 'text-green-600' :
+                      signal.color === 'red' ? 'text-red-600' : 'text-gray-600'
+                    }`}>
+                      {signal.close}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Animation CSS */}
+      <style>{`
+        @keyframes tickerMove {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-33.333%);
+          }
+        }
+      `}</style>
+    </div>
+  );
 };
+
+
+
 
 // Enhanced Executor component
 const Executor = ({
@@ -1399,7 +1436,8 @@ const Executor = ({
             <div className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></div>
             Risk - Sell Signals
           </h4>
-          <div className="space-y-3">
+          {/* ADDED SCROLLER HERE */}
+          <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-red-300 scrollbar-track-red-100 pr-2">
             {sellSignals.map((signal, i) => (
               <div
                 key={i}
@@ -1438,7 +1476,8 @@ const Executor = ({
             <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
             Today's Buy Signals - Action Required
           </h4>
-          <div className="space-y-3">
+          {/* ADDED SCROLLER HERE */}
+          <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-blue-100 pr-2">
             {buySignals
               .filter((signal) => signal.recommendation === "BUY")
               .map((signal, i) => {
@@ -1485,6 +1524,162 @@ const Executor = ({
 };
 
 
+
+// Bill Details Modal Component
+const BillDetailsModal = ({ bill, onClose }) => {
+  if (!bill) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-500 to-violet-600 text-white p-6 rounded-t-2xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-2xl font-bold">Bill Details</h3>
+              <p className="text-purple-100 text-sm mt-1">Bill #{bill.bill_number || 'N/A'}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-white hover:bg-white/20 rounded-full p-2 transition-all"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Basic Information */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-purple-50 rounded-xl p-4">
+              <p className="text-xs text-purple-600 font-medium mb-1">Bill Date</p>
+              <p className="text-lg font-bold text-purple-900">
+                {bill.bill_date ? new Date(bill.bill_date).toLocaleDateString() : 'N/A'}
+              </p>
+            </div>
+            <div className="bg-violet-50 rounded-xl p-4">
+              <p className="text-xs text-violet-600 font-medium mb-1">Clearance Date</p>
+              <p className="text-lg font-bold text-violet-900">
+                {bill.clearance_date ? new Date(bill.clearance_date).toLocaleDateString() : 'Pending'}
+              </p>
+            </div>
+          </div>
+
+          {/* Stock Details */}
+          <div className="border-2 border-purple-200 rounded-xl p-4">
+            <h4 className="text-sm font-bold text-purple-800 mb-3">Stock Details</h4>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-xs text-gray-600 mb-1">Symbol</p>
+                <p className="text-lg font-bold text-gray-900">{bill.symbol}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600 mb-1">Quantity</p>
+                <p className="text-lg font-bold text-gray-900">{bill.quantity}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600 mb-1">Price per Share</p>
+                <p className="text-lg font-bold text-gray-900">₹{bill.buyPrice || bill.price}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Financial Breakdown */}
+          <div className="border-2 border-purple-200 rounded-xl p-4">
+            <h4 className="text-sm font-bold text-purple-800 mb-3">Financial Breakdown</h4>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-700">Total Amount</span>
+                <span className="font-mono font-semibold text-gray-900">
+                  ₹{(bill.grand_total || bill.total_amount || 0).toLocaleString()}
+                </span>
+              </div>
+              
+              <div className="border-t border-purple-100 pt-3">
+                <p className="text-xs font-semibold text-purple-700 mb-2">Commissions & Charges</p>
+                <div className="space-y-2 pl-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Broker Commission</span>
+                    <span className="font-mono text-gray-800">
+                      ₹{(bill.broker_commission || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">SEBON Fee</span>
+                    <span className="font-mono text-gray-800">
+                      ₹{(bill.sebon_fee || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">DP Charge</span>
+                    <span className="font-mono text-gray-800">
+                      ₹{(bill.dp_charge || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm font-semibold border-t border-purple-100 pt-2">
+                    <span className="text-purple-700">Total Commission</span>
+                    <span className="font-mono text-purple-900">
+                      ₹{(bill.total_commission || 0).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t-2 border-purple-200 pt-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-bold text-purple-800">Net Receivable Amount</span>
+                  <span className="text-2xl font-bold text-purple-900 font-mono">
+                    ₹{(bill.net_receivable_amount || 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Effective Rate Calculation */}
+              <div className="bg-purple-50 rounded-lg p-3 border-2 border-purple-200">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-xs text-purple-600 font-medium mb-1">Effective Rate per Share</p>
+                    <p className="text-xs text-purple-500">
+                      (Net Amount + Commission) ÷ Quantity
+                    </p>
+                  </div>
+                  <span className="text-2xl font-bold text-purple-900 font-mono">
+                    ₹{bill.quantity > 0 
+                      ? (((bill.net_receivable_amount || 0) + (bill.total_commission || 0)) / bill.quantity).toFixed(2)
+                      : '0.00'
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Info */}
+          {(bill.remarks || bill.notes) && (
+            <div className="border-2 border-purple-200 rounded-xl p-4">
+              <h4 className="text-sm font-bold text-purple-800 mb-2">Additional Notes</h4>
+              <p className="text-sm text-gray-700">{bill.remarks || bill.notes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="bg-gray-50 p-6 rounded-b-2xl flex justify-end">
+          <button
+            onClick={onClose}
+            className="bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Enhanced Biller Component with Bill Details
 const Biller = ({ billerPositions, onSellFromBiller }) => {
   const [selectedBill, setSelectedBill] = useState(null);
@@ -1515,7 +1710,7 @@ const Biller = ({ billerPositions, onSellFromBiller }) => {
                   <th className="text-left p-2 font-semibold text-purple-800">Script</th>
                   <th className="text-left p-2 font-semibold text-purple-800">Qty</th>
                   <th className="text-left p-2 font-semibold text-purple-800">Buy Price</th>
-                  <th className="text-left p-2 font-semibold text-purple-800">Effective Rate</th> {/* ✅ NEW COLUMN */}
+                  <th className="text-left p-2 font-semibold text-purple-800">Effective Rate</th>
                   <th className="text-left p-2 font-semibold text-purple-800">Total Amount</th>
                   <th className="text-left p-2 font-semibold text-purple-800">Commissions</th>
                   <th className="text-left p-2 font-semibold text-purple-800">Net Amount</th>
@@ -1545,7 +1740,6 @@ const Biller = ({ billerPositions, onSellFromBiller }) => {
                       <td className="p-2 text-purple-700 font-mono text-xs">
                         ₹{position.buyPrice || position.price}
                       </td>
-                      {/* ✅ NEW: Effective Rate Column */}
                       <td className="p-2 text-purple-700 font-mono text-xs font-bold bg-purple-50">
                         ₹{effectiveRate.toFixed(2)}
                       </td>
@@ -1647,191 +1841,7 @@ const convertNumberToWords = (num) => {
   return words.trim() + ' ONLY';
 };
 
-// Bill Details Modal Component
-const BillDetailsModal = ({ bill, onClose }) => {
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-purple-500 to-violet-600 text-white p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-2xl font-bold">Transaction Bill Details</h3>
-              <p className="text-purple-100 text-sm mt-1">
-                Bill Number: {bill.bill_number || 'N/A'}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-          {/* Bill Header Info */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
-              <div className="text-sm text-purple-600 mb-1">Bill Date</div>
-              <div className="text-lg font-bold text-purple-800">
-                {bill.bill_date ? new Date(bill.bill_date).toLocaleDateString() : 'N/A'}
-              </div>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
-              <div className="text-sm text-purple-600 mb-1">Clearance Date</div>
-              <div className="text-lg font-bold text-purple-800">
-                {bill.clearance_date ? new Date(bill.clearance_date).toLocaleDateString() : 'Pending'}
-              </div>
-            </div>
-          </div>
-
-          {/* Broker Information */}
-          {(bill.broker_name || bill.broker_number) && (
-            <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-              <h4 className="font-bold text-blue-800 mb-2">Broker Information</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-blue-600">Broker Name:</span>
-                  <p className="font-semibold text-blue-800">{bill.broker_name || 'N/A'}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-blue-600">Broker Number:</span>
-                  <p className="font-semibold text-blue-800">{bill.broker_number || 'N/A'}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Transaction Items */}
-          {bill.items && bill.items.length > 0 && (
-            <div className="mb-6">
-              <h4 className="font-bold text-gray-800 mb-3">Transaction Items</h4>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-purple-50 to-violet-50 border-b-2 border-purple-200">
-                      <th className="text-left p-3 font-semibold text-purple-800">Company Name</th>
-                      <th className="text-left p-3 font-semibold text-purple-800">Symbol</th>
-                      <th className="text-right p-3 font-semibold text-purple-800">Qty</th>
-                      <th className="text-right p-3 font-semibold text-purple-800">Rate</th>
-                      <th className="text-right p-3 font-semibold text-purple-800">Amount</th>
-                      <th className="text-right p-3 font-semibold text-purple-800">Commission</th>
-                      <th className="text-right p-3 font-semibold text-purple-800">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bill.items.map((item, idx) => (
-                      <tr key={idx} className="border-b border-purple-100 hover:bg-purple-50/30">
-                        <td className="p-3 text-gray-700">{item.company_name}</td>
-                        <td className="p-3 font-bold text-purple-800">{item.symbol}</td>
-                        <td className="p-3 text-right font-semibold">{item.quantity}</td>
-                        <td className="p-3 text-right font-mono">₹{item.rate.toFixed(2)}</td>
-                        <td className="p-3 text-right font-mono">₹{item.amount.toLocaleString()}</td>
-                        <td className="p-3 text-right font-mono text-red-600">
-                          ₹{(item.commission_amount || 0).toFixed(2)}
-                        </td>
-                        <td className="p-3 text-right font-mono font-bold">
-                          ₹{(item.total || item.amount).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Financial Summary */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-green-50 p-4 rounded-xl border border-green-200">
-              <h4 className="font-bold text-green-800 mb-3">Transaction Summary</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-green-600">Share Amount:</span>
-                  <span className="font-bold text-green-800">₹{(bill.share_amount || 0).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-green-600">Share Quantity:</span>
-                  <span className="font-bold text-green-800">{bill.share_quantity || 0}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-green-300">
-                  <span className="text-green-600">Sub Total:</span>
-                  <span className="font-bold text-green-800">₹{(bill.sub_total || 0).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-green-600 font-bold">Grand Total:</span>
-                  <span className="font-bold text-green-800 text-lg">₹{(bill.grand_total || 0).toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-red-50 p-4 rounded-xl border border-red-200">
-              <h4 className="font-bold text-red-800 mb-3">Commission Breakdown</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-red-600">SEBN Commission:</span>
-                  <span className="font-mono text-red-800">₹{(bill.sebn_commission || 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-red-600">NEPSE Commission:</span>
-                  <span className="font-mono text-red-800">₹{(bill.nepse_commission || 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-red-600">SEBON Regulatory Fee:</span>
-                  <span className="font-mono text-red-800">₹{(bill.sebon_regulatory_fee || 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-red-600">Broker Commission:</span>
-                  <span className="font-mono text-red-800">₹{(bill.broker_commission || 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-red-600">Name Transfer:</span>
-                  <span className="font-mono text-red-800">₹{(bill.name_transfer_amount || 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-red-600">DP Amount:</span>
-                  <span className="font-mono text-red-800">₹{(bill.dp_amount || 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-red-300">
-                  <span className="text-red-600 font-bold">Total Commission:</span>
-                  <span className="font-bold text-red-800">₹{(bill.total_commission || 0).toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* UPDATED: Net Receivable with Dynamic Amount in Words */}
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-bold text-blue-800">Net Receivable Amount:</span>
-              <span className="text-2xl font-bold text-blue-900">
-                ₹{(bill.net_receivable_amount || 0).toLocaleString()}
-              </span>
-            </div>
-            <p className="text-xs text-blue-600 mt-2">
-              Amount in Words: {convertNumberToWords(bill.net_receivable_amount || 0)}
-            </p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 text-white rounded-lg font-semibold transition-all shadow-md"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Odd Lot Balance Component
 const OddLotBalance = ({ oddLots }) => {
@@ -1879,6 +1889,47 @@ const SignalAnalysis = ({ token, signals }) => {
   });
   const [comparisonData, setComparisonData] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+  // ✅ NEW: State for 14 days historical data
+  const [historicalSignals, setHistoricalSignals] = useState([]);
+  const [historicalLoading, setHistoricalLoading] = useState(false);
+
+  // ✅ NEW: Fetch last 14 days of signals on mount
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchHistoricalSignals = async () => {
+      setHistoricalLoading(true);
+      
+      try {
+        // Calculate date range for last 14 days
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 14);
+
+        const response = await fetch(
+          `${API_BASE_URL}/signals/historical?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`,
+          {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setHistoricalSignals(data.signals || []);
+        }
+      } catch (error) {
+        console.error('Error fetching historical signals:', error);
+      } finally {
+        setHistoricalLoading(false);
+      }
+    };
+
+    fetchHistoricalSignals();
+  }, [token]);
 
   const handleRecalculate = async () => {
     setLoading(true);
@@ -1900,19 +1951,22 @@ const SignalAnalysis = ({ token, signals }) => {
     }
   };
 
-  // Filter signals based on sub-tab
+  // ✅ UPDATED: Filter signals based on sub-tab using 14 days data
   const getFilteredSignals = () => {
-    if (!signals || signals.length === 0) return [];
+    // Use historical signals (14 days) instead of just today's signals
+    const dataSource = historicalSignals.length > 0 ? historicalSignals : signals;
+    
+    if (!dataSource || dataSource.length === 0) return [];
     
     switch (historicalSubTab) {
       case 'buy':
-        return signals.filter(s => s.signal === 'BUY' || s.recommendation === 'BUY');
+        return dataSource.filter(s => s.signal === 'BUY' || s.recommendation === 'BUY');
       case 'sell':
-        return [];
+        return dataSource.filter(s => s.signal === 'SELL' || s.recommendation === 'SELL');
       case 'all':
-        return signals;
+        return dataSource;
       default:
-        return signals;
+        return dataSource;
     }
   };
 
@@ -2002,103 +2056,115 @@ const SignalAnalysis = ({ token, signals }) => {
             </div>
           </div>
 
-          {/* Signals Count Badge */}
-          <div className="mb-4 flex items-center space-x-4">
-            <div className="px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
-              <span className="text-sm font-semibold text-indigo-800">
-                {historicalSubTab === 'buy' && `${filteredSignals.length} Buy Signals Found`}
-                {historicalSubTab === 'sell' && `${filteredSignals.length} Sell Transactions`}
-                {historicalSubTab === 'all' && `${filteredSignals.length} Total Signals`}
-              </span>
+          {/* ✅ ADDED: Loading indicator */}
+          {historicalLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              <span className="ml-3 text-gray-600">Loading 14 days of signals...</span>
             </div>
-          </div>
+          )}
 
-          {/* Signals Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-200">
-                  <th className="text-left p-3 font-semibold text-indigo-800">Date</th>
-                  <th className="text-left p-3 font-semibold text-indigo-800">Symbol</th>
-                  <th className="text-left p-3 font-semibold text-indigo-800">Price</th>
-                  <th className="text-left p-3 font-semibold text-indigo-800">RSI</th>
-                  <th className="text-left p-3 font-semibold text-indigo-800">MA50</th>
-                  <th className="text-left p-3 font-semibold text-indigo-800">MACD</th>
-                  <th className="text-left p-3 font-semibold text-indigo-800">Volume</th>
-                  {historicalSubTab === 'all' && (
-                    <th className="text-left p-3 font-semibold text-indigo-800">Signal</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSignals && filteredSignals.length > 0 ? (
-                  filteredSignals.map((signal, idx) => {
-                    const recommendation = signal.signal || signal.recommendation || 'N/A';
-                    const isBuy = recommendation === 'BUY';
-                    
-                    return (
-                      <tr key={idx} className={`border-b border-indigo-100 hover:bg-indigo-50/50 ${isBuy ? 'bg-green-50/30' : 'bg-red-50/30'}`}>
-                        <td className="p-3 text-indigo-700">{signal.date || 'N/A'}</td>
-                        <td className="p-3 font-bold text-indigo-800">{signal.symbol || 'N/A'}</td>
-                        <td className="p-3 font-mono text-indigo-700">₹{signal.price || signal.close || 0}</td>
-                        <td className="p-3">
-                          {signal.rsi ? (
-                            <span className={`text-xs font-medium ${signal.rsi_ok ? 'text-green-600' : 'text-red-600'}`}>
-                              {signal.rsi.toFixed(1)} {signal.rsi_ok ? '✓' : '✗'}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-400">-</span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          {signal.ma50 ? (
-                            <span className={`text-xs font-medium ${signal.ma_ok ? 'text-green-600' : 'text-red-600'}`}>
-                              {signal.ma50.toFixed(0)} {signal.ma_ok ? '✓' : '✗'}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-400">-</span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          {signal.macd ? (
-                            <span className={`text-xs font-medium ${signal.macd_ok ? 'text-green-600' : 'text-red-600'}`}>
-                              {signal.macd.toFixed(2)} {signal.macd_ok ? '✓' : '✗'}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-400">-</span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          {signal.volume ? (
-                            <span className={`text-xs font-medium ${signal.volume_ok ? 'text-green-600' : 'text-red-600'}`}>
-                              {signal.volume.toLocaleString()} {signal.volume_ok ? '✓' : '✗'}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-400">-</span>
-                          )}
-                        </td>
-                        {historicalSubTab === 'all' && (
-                          <td className="p-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${isBuy ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {recommendation}
-                            </span>
-                          </td>
-                        )}
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={historicalSubTab === 'all' ? 8 : 7} className="p-8 text-center text-gray-500">
-                      {historicalSubTab === 'buy' && 'No buy signals in the last 14 days'}
-                      {historicalSubTab === 'sell' && 'No sell transactions in the last 14 days'}
-                      {historicalSubTab === 'all' && 'No signals available'}
-                    </td>
+          {/* Signals Count Badge */}
+          {!historicalLoading && (
+            <div className="mb-4 flex items-center space-x-4">
+              <div className="px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+                <span className="text-sm font-semibold text-indigo-800">
+                  {historicalSubTab === 'buy' && `${filteredSignals.length} Buy Signals Found (Last 14 Days)`}
+                  {historicalSubTab === 'sell' && `${filteredSignals.length} Sell Signals (Last 14 Days)`}
+                  {historicalSubTab === 'all' && `${filteredSignals.length} Total Signals (Last 14 Days)`}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Signals Table - WITH SCROLL */}
+          {!historicalLoading && (
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-white z-10">
+                  <tr className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-200">
+                    <th className="text-left p-3 font-semibold text-indigo-800">Date</th>
+                    <th className="text-left p-3 font-semibold text-indigo-800">Symbol</th>
+                    <th className="text-left p-3 font-semibold text-indigo-800">Price</th>
+                    <th className="text-left p-3 font-semibold text-indigo-800">RSI</th>
+                    <th className="text-left p-3 font-semibold text-indigo-800">MA50</th>
+                    <th className="text-left p-3 font-semibold text-indigo-800">MACD</th>
+                    <th className="text-left p-3 font-semibold text-indigo-800">Volume</th>
+                    {historicalSubTab === 'all' && (
+                      <th className="text-left p-3 font-semibold text-indigo-800">Signal</th>
+                    )}
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredSignals && filteredSignals.length > 0 ? (
+                    filteredSignals.map((signal, idx) => {
+                      const recommendation = signal.signal || signal.recommendation || 'N/A';
+                      const isBuy = recommendation === 'BUY';
+                      
+                      return (
+                        <tr key={idx} className={`border-b border-indigo-100 hover:bg-indigo-50/50 ${isBuy ? 'bg-green-50/30' : 'bg-red-50/30'}`}>
+                          <td className="p-3 text-indigo-700">{signal.date || 'N/A'}</td>
+                          <td className="p-3 font-bold text-indigo-800">{signal.symbol || 'N/A'}</td>
+                          <td className="p-3 font-mono text-indigo-700">₹{signal.price || signal.close || 0}</td>
+                          <td className="p-3">
+                            {signal.rsi ? (
+                              <span className={`text-xs font-medium ${signal.rsi_ok ? 'text-green-600' : 'text-red-600'}`}>
+                                {signal.rsi.toFixed(1)} {signal.rsi_ok ? '✓' : '✗'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            {signal.ma50 || signal.ma_50 ? (
+                              <span className={`text-xs font-medium ${signal.ma_ok ? 'text-green-600' : 'text-red-600'}`}>
+                                {(signal.ma50 || signal.ma_50).toFixed(0)} {signal.ma_ok ? '✓' : '✗'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            {signal.macd ? (
+                              <span className={`text-xs font-medium ${signal.macd_ok ? 'text-green-600' : 'text-red-600'}`}>
+                                {signal.macd.toFixed(2)} {signal.macd_ok ? '✓' : '✗'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            {signal.volume ? (
+                              <span className={`text-xs font-medium ${signal.volume_ok ? 'text-green-600' : 'text-red-600'}`}>
+                                {signal.volume.toLocaleString()} {signal.volume_ok ? '✓' : '✗'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">-</span>
+                            )}
+                          </td>
+                          {historicalSubTab === 'all' && (
+                            <td className="p-3">
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${isBuy ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {recommendation}
+                              </span>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={historicalSubTab === 'all' ? 8 : 7} className="p-8 text-center text-gray-500">
+                        {historicalSubTab === 'buy' && 'No buy signals in the last 14 days'}
+                        {historicalSubTab === 'sell' && 'No sell signals in the last 14 days'}
+                        {historicalSubTab === 'all' && 'No signals available'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -2139,11 +2205,6 @@ const SignalAnalysis = ({ token, signals }) => {
                     placeholder="60"
                   />
                 </div>
-                {/* <div>
-                  <p className="text-xs text-purple-600">
-                    Signal when RSI ≥ <span className="font-bold">{thresholds.rsi_threshold || 60}</span>
-                  </p>
-                </div> */}
               </div>
 
               {/* MA50 Buffer - Inline */}
@@ -2250,7 +2311,7 @@ const SignalAnalysis = ({ token, signals }) => {
                   })}
                   className="py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors text-sm"
                 >
-                  🔄 Reset to Origial Rule
+                  🔄 Reset to Original Rule
                 </button>
 
                 <button
@@ -2385,6 +2446,7 @@ const SignalAnalysis = ({ token, signals }) => {
     </div>
   );
 };
+
 // Section Card Component
 const SectionCard = ({ number, title, children, gradient = "from-gray-500 to-gray-600", bgColor = "bg-white" }) => (
   <div className={`${bgColor} rounded-2xl shadow-lg border border-gray-200/50 p-6 hover:shadow-xl transition-all duration-300 h-full`}>
@@ -2397,7 +2459,7 @@ const SectionCard = ({ number, title, children, gradient = "from-gray-500 to-gra
 );
 
 function TradingDashboard() {
-  const { token } = useAuth(); 
+  const { token, isSuperuser } = useAuth(); 
   const [realSignals, setRealSignals] = useState([]);
   const [signalsLoading, setSignalsLoading] = useState(false);
   const [signalsError, setSignalsError] = useState(null);
@@ -2444,6 +2506,10 @@ function TradingDashboard() {
   const [showSectorModal, setShowSectorModal] = useState(false);
   const [selectedSectorData, setSelectedSectorData] = useState(null);
   const [loadingSymbols, setLoadingSymbols] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState('all');
+  const [adminStats, setAdminStats] = useState(null);
+
 
   const technicalIndicators = ["RSI", "MA", "MACD", "Volume"];
 
@@ -2588,6 +2654,35 @@ function TradingDashboard() {
         };
       });
   };
+
+  const fetchAllUsers = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAllUsers(data.users || []);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const fetchAdminStats = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/all-trading-data`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAdminStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+    }
+  };
+
 
   const checkForOddLots = (riskPositions) => {
     return riskPositions
@@ -2782,6 +2877,13 @@ function TradingDashboard() {
   ];
   setExecutorLogs(initialLogs);
 }, [token, riskSettings.portfolioSize]); 
+
+useEffect(() => {
+  if (isSuperuser && token) {
+    fetchAllUsers();
+    fetchAdminStats();
+  }
+}, [isSuperuser, token]);
 
  
 
@@ -3332,7 +3434,7 @@ useEffect(() => {
         )}
 
         <main className={`flex-1 min-h-screen transition-all duration-300 ${sidebarVisible ? '' : 'lg:ml-12'}`}>
-         <div className="hidden lg:flex items-center justify-between p-6 bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30">
+          <div className="hidden lg:flex items-center justify-between p-6 bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Trading Dashboard</h1>
               <p className="text-sm text-gray-500 mt-1">
@@ -3379,10 +3481,88 @@ useEffect(() => {
             </div>
           )}
 
+         {/* ADD ADMIN PANEL HERE */}
+          {isSuperuser && (
+            <div className="mx-6 mt-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-2xl shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <span className="text-3xl mr-3"></span>
+                  <div>
+                    <h2 className="text-2xl font-bold text-purple-800">
+                      PRODUCT OWNER DASHBOARD
+                    </h2>
+                    <p className="text-sm text-purple-600">Administrator View - All Users Data</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    fetchAdminStats();
+                    fetchAllUsers();
+                  }}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-colors flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Refresh Stats</span>
+                </button>
+              </div>
+
+              {/* Admin Statistics */}
+              {adminStats && (
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="p-4 bg-white rounded-xl border-2 border-purple-200 shadow-sm">
+                    <div className="text-sm text-purple-600 font-medium">Total Users</div>
+                    <div className="text-3xl font-bold text-purple-800">{adminStats.total_users || 0}</div>
+                  </div>
+                  <div className="p-4 bg-white rounded-xl border-2 border-purple-200 shadow-sm">
+                    <div className="text-sm text-purple-600 font-medium">Total Positions</div>
+                    <div className="text-3xl font-bold text-purple-800">{adminStats.total_positions || 0}</div>
+                  </div>
+                  <div className="p-4 bg-white rounded-xl border-2 border-purple-200 shadow-sm">
+                    <div className="text-sm text-purple-600 font-medium">Total Portfolio Value</div>
+                    <div className="text-3xl font-bold text-purple-800">
+                      ₹{(adminStats.total_portfolio_value || 0).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="p-4 bg-white rounded-xl border-2 border-purple-200 shadow-sm">
+                    <div className="text-sm text-purple-600 font-medium">Total Transactions</div>
+                    <div className="text-3xl font-bold text-purple-800">
+                      {adminStats.transactions?.length || 0}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* User Selector */}
+              <div className="p-4 bg-yellow-50 border-2 border-yellow-300 rounded-xl">
+                <label className="block text-sm font-bold text-yellow-800 mb-2">
+                  View Data For:
+                </label>
+                <select 
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="w-full p-3 border-2 border-yellow-300 rounded-lg bg-white font-medium"
+                >
+                  <option value="all">All Users (Aggregated View)</option>
+                  {allUsers.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.email} {user.is_superuser}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-yellow-700 mt-2">
+                  Select a specific user to view their individual trading data
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="px-6 pt-6">
             <BuySignalsTicker signals={signals} setSignals={setSignals} />
           </div>
 
+          {/* ✅ FIXED: Removed scrollable wrapper - single scroll bar now */}
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
@@ -3585,7 +3765,6 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* UPDATED: Balance Section with Swapped Positions */}
             <div className="grid grid-cols-1 gap-6">
               <SectionCard
                 number="5"
@@ -3593,7 +3772,6 @@ useEffect(() => {
                 gradient="from-blue-600 to-cyan-600"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* 1. Available Cash */}
                   <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-sm">
                     <div className="text-2xl font-bold text-green-700 mb-1">
                       ₹{(cashBalance || 0).toLocaleString()}
@@ -3607,7 +3785,6 @@ useEffect(() => {
                     </div>
                   </div>
 
-                  {/* 2. Risk Amount - UPDATED */}
                   <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl shadow-sm">
                     {(() => {
                       const portfolio = calculatePortfolioValue();
@@ -3633,7 +3810,6 @@ useEffect(() => {
                     })()}
                   </div>
 
-                  {/* 3. Odd Lot Balance */}
                   <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl shadow-sm">
                     {(() => {
                       const portfolio = calculatePortfolioValue();
@@ -3663,7 +3839,6 @@ useEffect(() => {
                     })()}
                   </div>
 
-                  {/* 4. Total Portfolio Value - UPDATED */}
                   <div className="text-center p-4 bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-sm">
                     {(() => {
                       const portfolio = calculatePortfolioValue();
@@ -3682,7 +3857,6 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* Cumulative P&L Section - UPDATED */}
                 <div className="mt-4 p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-xl shadow-sm">
                   {(() => {
                     const portfolio = calculatePortfolioValue();
@@ -3727,7 +3901,6 @@ useEffect(() => {
               />
             </div>
 
-            {/* ADD THIS: Component 7 */}
             <div className="grid grid-cols-1 gap-6">
               <SignalAnalysis 
                 token={token}
@@ -3907,20 +4080,20 @@ useEffect(() => {
 
 
       <style jsx>{`
-        @keyframes scroll {
+        @keyframes ticker-scroll {
           0% {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-100%);
+            transform: translateX(-33.333%);
           }
         }
 
-        .animate-scroll {
-          animation: scroll 30s linear infinite;
+        .ticker-wrapper {
+          animation: ticker-scroll 60s linear infinite;
         }
 
-        .animate-scroll:hover {
+        .ticker-wrapper:hover {
           animation-play-state: paused;
         }
 

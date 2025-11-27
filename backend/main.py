@@ -7,8 +7,8 @@ from datetime import datetime, timedelta, date, timezone
 from jose import jwt, JWTError
 from pathlib import Path
 from dotenv import load_dotenv
-from backend.core.api.sectors import router as sectors_router
-from backend.core.trading.sell_routes import router as sell_router  
+from core.api.sectors import router as sectors_router
+from core.trading.sell_routes import router as sell_router  
 import time
 import bcrypt
 import random
@@ -22,7 +22,7 @@ import subprocess
 # Load environment variables FIRST
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
-from backend.core.config import settings  # Use existing config
+from core.config import settings  # Use existing config
 
 
 # File paths for signals
@@ -32,23 +32,26 @@ ALL_SIGNALS_PATH = BACKEND_DIR / "core" / "data" / "all_signals.csv"
 
 
 # Local imports
-from backend.core.database import Base, engine, SessionLocal
-from backend.core.auth.models import (
+from core.database import Base, engine, SessionLocal
+from core.auth.models import (
     User, Order, OrderType, StopLossPosition, StopLossStatus,
     UserPortfolio, Position, DailyEntry, PositionStatus  
 )
-from backend.core.auth.schemas import StopLossCreate
-from backend.core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
-from backend.core.auth.email_service import send_verification_email
+from core.auth.schemas import StopLossCreate
+from core.pipeline.nepse_pipeline import get_today_signals, run_pipeline
+from core.auth.email_service import send_verification_email
 
-# MPORT FROM dependencies.py (not defined in main.py anymore)
-from backend.core.auth.dependencies import get_current_user, get_db, get_user_by_email
+from core.auth.dependencies import get_current_user, get_db, get_user_by_email
+from core.signals.historical_routes import router as historical_router
+
 
 # App initialization
 app = FastAPI(title="Trading System with JWT + OTP + DB Orders", version="1.0.0")
 
 app.include_router(sectors_router)
-app.include_router(sell_router)  
+app.include_router(sell_router) 
+app.include_router(historical_router)
+
 
 
 def run_merolagani_pipeline():
@@ -103,7 +106,7 @@ def startup_event():
     print("="*80)
     
     try:
-        from backend.core.auth import models
+        from core.auth import models
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully!")
         
@@ -271,15 +274,29 @@ async def verify_otp(request: VerifyOTPRequest, db: Session = Depends(get_db)):
     return {"message": "Email verified successfully. You can now log in."}
 
 @app.post("/auth/login") 
-async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db=Depends(get_db)): 
-    user = get_user_by_email(db, form_data.username) 
-    if not user or not verify_password(form_data.password, user.hashed_password): 
+async def login_user(request: LoginRequest, db: Session = Depends(get_db)): 
+    user = get_user_by_email(db, request.email) 
+    if not user or not verify_password(request.password, user.hashed_password): 
         raise HTTPException(status_code=400, detail="Invalid credentials") 
     if not user.is_verified: 
         raise HTTPException(status_code=403, detail="Email not verified") 
-    token_data = {"sub": user.email} 
+    
+    token_data = {"sub": user.email, "is_superuser": getattr(user, 'is_superuser', False)} 
     access_token = create_access_token(data=token_data) 
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    # ✅ Return user object with the token
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "is_verified": user.is_verified,
+            "is_active": getattr(user, 'is_active', True),
+            "is_superuser": getattr(user, 'is_superuser', False),
+            "role": getattr(user, 'role', 'user')
+        }
+    }
 
 @app.get("/auth/me")
 async def get_me(current_user: User = Depends(get_current_user)):
@@ -445,7 +462,7 @@ async def get_historical_signals(
 ):
     """Get historical signals for last N days (for Signal Analysis component)"""
     try:
-        from backend.core.pipeline.nepse_pipeline import get_last_n_days_signals
+        from core.pipeline.nepse_pipeline import get_last_n_days_signals
         
         # Get last N days of signals
         historical_df = get_last_n_days_signals(days=days)
@@ -984,6 +1001,87 @@ async def get_today_summary(
                 "time": o.created_at.strftime("%H:%M:%S")
             }
             for o in orders_today
+        ]
+    }
+
+# ---------------------------
+# ADMIN: GET ALL TRADING DATA
+# ---------------------------
+@app.get("/admin/all-trading-data")
+async def get_all_trading_data(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get aggregated trading data for admin dashboard"""
+    
+    # Check if user is superuser
+    if not getattr(current_user, 'is_superuser', False):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get total users
+    total_users = db.query(User).count()
+    
+    # Get all orders
+    all_orders = db.query(Order).all()
+    
+    # Get all stop-loss positions
+    all_positions = db.query(StopLossPosition).filter(
+        StopLossPosition.status.in_([StopLossStatus.ACTIVE, StopLossStatus.PARTIALLY_SOLD])
+    ).all()
+    
+    # Calculate totals
+    total_buy_amount = sum(o.amount for o in all_orders if o.order_type == OrderType.BUY)
+    total_sell_amount = sum(o.amount for o in all_orders if o.order_type == OrderType.SELL)
+    
+    return {
+        "total_users": total_users,
+        "total_positions": len(all_positions),
+        "total_portfolio_value": total_buy_amount - total_sell_amount,
+        "total_orders": len(all_orders),
+        "transactions": [
+            {
+                "id": o.id,
+                "user_email": o.user_email,
+                "symbol": o.symbol,
+                "type": o.order_type.value,
+                "quantity": o.quantity,
+                "price": o.price,
+                "amount": o.amount,
+                "created_at": o.created_at.isoformat()
+            }
+            for o in all_orders[:50]  # Limit to last 50 transactions
+        ]
+    }
+
+
+# ---------------------------
+# ADMIN: GET ALL USERS
+# ---------------------------
+@app.get("/admin/users")
+async def get_all_users_admin(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all users for admin dropdown"""
+    
+    # Check if user is superuser
+    if not getattr(current_user, 'is_superuser', False):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    users = db.query(User).all()
+    
+    return {
+        "total_users": len(users),
+        "users": [
+            {
+                "id": u.id,
+                "email": u.email,
+                "is_verified": u.is_verified,
+                "is_active": getattr(u, 'is_active', True),
+                "is_superuser": getattr(u, 'is_superuser', False),
+                "created_at": str(getattr(u, 'created_at', None))
+            }
+            for u in users
         ]
     }
 

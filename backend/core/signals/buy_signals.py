@@ -1,6 +1,6 @@
 # backend/core/signals/buy_signals.py
 import pandas as pd
-from backend.core.technical_indicators.technicals import calculate_indicators
+from core.technical_indicators.technicals import calculate_indicators
 
 def check_buy_conditions(
     data: pd.DataFrame,

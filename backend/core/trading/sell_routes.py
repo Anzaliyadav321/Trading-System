@@ -7,14 +7,14 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 # IMPORT FROM dependencies.py (NOT from main.py)
-from backend.core.auth.dependencies import get_current_user, get_db
-from backend.core.auth.models import User, Transaction, Position
-from backend.core.signals.sell_signals import (
+from core.auth.dependencies import get_current_user, get_db
+from core.auth.models import User, Transaction, Position
+from core.signals.sell_signals import (
     generate_sell_signals,
     check_positions_for_sell,
     get_sell_recommendations
 )
-from backend.core.technical_indicators.technicals import calculate_indicators
+from core.technical_indicators.technicals import calculate_indicators
 
 router = APIRouter(prefix="/sell-signals", tags=["sell-signals"])
 

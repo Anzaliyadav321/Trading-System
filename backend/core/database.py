@@ -51,7 +51,7 @@ def get_db():
 # IMPORT ALL MODELS HERE
 # -----------------------------------------------------
 # This ensures SQLAlchemy detects the tables and creates them
-from backend.core.auth import models
+from core.auth import models
 
 
 # -----------------------------------------------------

@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Text
 from datetime import datetime
 import enum
-from backend.core.database import Base
+from core.database import Base
 
 
 # ============================================
@@ -45,6 +45,11 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     otp = Column(String, nullable=True)
     otp_created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+
+    is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
+    role = Column(String, default="user")
+
 
     # Relationships
     orders = relationship("Order", back_populates="user")

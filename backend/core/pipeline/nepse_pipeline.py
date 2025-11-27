@@ -4,8 +4,8 @@
 import pandas as pd
 from pathlib import Path
 from datetime import date
-from backend.core.signals.buy_signals import generate_buy_signals
-from backend.core.technical_indicators.technicals import calculate_indicators
+from core.signals.buy_signals import generate_buy_signals
+from core.technical_indicators.technicals import calculate_indicators
 
 # Paths
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
