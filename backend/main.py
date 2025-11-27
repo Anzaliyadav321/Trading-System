@@ -18,9 +18,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
-
+import sys
+import os
 # Load environment variables FIRST
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core.config import settings  # Use existing config
 
