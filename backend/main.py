@@ -119,10 +119,35 @@ def startup_event():
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully!")
         
-        from sqlalchemy import inspect
-        inspector = inspect(engine)
-        tables = inspector.get_table_names()
+        # === AUTO-MIGRATION: Add missing columns ===
+        from sqlalchemy import text, inspect
         
+        inspector = inspect(engine)
+        existing_columns = [col['name'] for col in inspector.get_columns('users')]
+        print(f"Existing columns: {existing_columns}")
+        
+        with engine.connect() as conn:
+            # Add is_active if missing
+            if 'is_active' not in existing_columns:
+                conn.execute(text('ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE'))
+                print("✓ Added is_active column")
+            
+            # Add is_superuser if missing
+            if 'is_superuser' not in existing_columns:
+                conn.execute(text('ALTER TABLE users ADD COLUMN is_superuser BOOLEAN DEFAULT FALSE'))
+                print("✓ Added is_superuser column")
+            
+            # Add role if missing
+            if 'role' not in existing_columns:
+                conn.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'"))
+                print("✓ Added role column")
+            
+            conn.commit()
+        
+        print("✓ Database migration complete!")
+        # === END AUTO-MIGRATION ===
+        
+        tables = inspector.get_table_names()
         print(f"\nTables in database: {len(tables)}")
         for table in tables:
             print(f"   {table}")
