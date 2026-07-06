@@ -13,3 +13,31 @@ Features
 * WT Authentication — Email/OTP-based signup and secure token-based login.
 * Scheduled Automation — Background scheduler runs the daily scrape + signal pipeline automatically.
 * React Frontend — Ticker views, signal analysis dashboards, order execution, and a bill/receipt viewer (Biller component).
+
+Tech Stack
+
+Backend
+
+
+* FastAPI (Python)
+* SQLAlchemy ORM + SQLite (local) / PostgreSQL (production)
+* APScheduler for daily cron jobs
+* JWT (python-jose) + bcrypt for auth
+* Pandas for data processing and indicator calculations
+
+
+Frontend
+
+
+React
+Component-based dashboard (Ticker, Signal Analysis, Executor, Biller)
+
+
+Deployment
+
+
+Backend: Render
+Frontend: Vercel
+
+
+
