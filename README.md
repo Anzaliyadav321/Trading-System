@@ -36,8 +36,8 @@ Component-based dashboard (Ticker, Signal Analysis, Executor, Biller)
 Deployment
 
 
-Backend: Render
-Frontend: Vercel
+* Backend: Render
+* Frontend: Vercel
 
 
 
